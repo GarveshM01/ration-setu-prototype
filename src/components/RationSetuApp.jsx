@@ -253,6 +253,12 @@ const dict = {
   // Dealer
   dealerPortal: { hi: "डीलर पोर्टल", en: "Dealer Portal" },
   officialPortal: { hi: "आधिकारिक पोर्टल", en: "Official Portal" },
+  dealerLogin: { hi: "डीलर लॉगिन", en: "Dealer Login" },
+  dealerId: { hi: "FPS / डीलर ID", en: "FPS / Dealer ID" },
+  dealerPin: { hi: "सुरक्षा PIN", en: "Security PIN" },
+  dealerSignIn: { hi: "पोर्टल में प्रवेश करें", en: "Sign in to portal" },
+  demoDealerHint: { hi: "डेमो: FPS-102 और PIN 1234", en: "Demo: FPS-102 and PIN 1234" },
+  invalidDealerLogin: { hi: "गलत ID या PIN। डेमो विवरण जांचें।", en: "Incorrect ID or PIN. Check the demo details." },
   todaysOverview: { hi: "आज का सारांश", en: "Today's Overview" },
   totalTokens: { hi: "कुल टोकन", en: "Total Tokens" },
   avgWait: { hi: "औसत प्रतीक्षा", en: "Average Wait" },
@@ -880,6 +886,55 @@ function LoginScreen({ onDone }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function DealerLoginScreen({ onLogin }) {
+  const { t } = useT();
+  const [dealerId, setDealerId] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (dealerId.trim().toUpperCase() === "FPS-102" && pin === "1234") {
+      setError("");
+      onLogin();
+      return;
+    }
+    setError(t(dict.invalidDealerLogin));
+  };
+
+  return (
+    <div style={{ maxWidth: 460, width: "100%", margin: "0 auto" }}>
+      <Card style={{ padding: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 22 }}>
+          <Logo size={52} />
+          <h2 style={{ fontFamily: "Poppins, sans-serif", color: C.navy, fontSize: 22, margin: "14px 0 5px" }}>{t(dict.dealerLogin)}</h2>
+          <p style={{ color: C.grey, fontSize: 12.5, margin: 0 }}>{t(dict.officialPortal)}</p>
+        </div>
+        <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, marginBottom: 7 }}>{t(dict.dealerId)}</label>
+        <input
+          value={dealerId}
+          onChange={(e) => setDealerId(e.target.value)}
+          placeholder="FPS-102"
+          autoComplete="username"
+          style={{ width: "100%", border: `1.5px solid ${C.greyLine}`, borderRadius: 10, padding: "12px 13px", fontSize: 14, outline: "none", marginBottom: 14 }}
+        />
+        <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, marginBottom: 7 }}>{t(dict.dealerPin)}</label>
+        <input
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          placeholder="••••"
+          type="password"
+          inputMode="numeric"
+          autoComplete="current-password"
+          style={{ width: "100%", border: `1.5px solid ${C.greyLine}`, borderRadius: 10, padding: "12px 13px", fontSize: 14, outline: "none", marginBottom: 8 }}
+        />
+        <p style={{ color: C.grey, fontSize: 11.5, margin: "0 0 16px" }}>{t(dict.demoDealerHint)}</p>
+        {error && <p role="alert" style={{ color: C.red, fontSize: 12.5, margin: "0 0 12px" }}>{error}</p>}
+        <Btn full icon={ShieldCheck} disabled={!dealerId.trim() || pin.length !== 4} onClick={submit}>{t(dict.dealerSignIn)}</Btn>
+      </Card>
     </div>
   );
 }
@@ -1793,6 +1848,7 @@ function InsightCard({ icon: Icon, color, title, body }) {
 export default function RationSetuApp() {
   const [lang, setLang] = useState("hi");
   const [role, setRole] = useState("beneficiary");
+  const [dealerAuthenticated, setDealerAuthenticated] = useState(false);
   const [state, dispatch] = useReducer(reducer, undefined, loadInitialState);
 
   useEffect(() => {
@@ -1866,7 +1922,7 @@ export default function RationSetuApp() {
               { key: "beneficiary", label: t(dict.roleBen), icon: User },
               { key: "dealer", label: t(dict.roleDealer), icon: LayoutDashboard },
             ].map((r) => (
-              <button key={r.key} onClick={() => setRole(r.key)} style={{
+              <button key={r.key} onClick={() => { setRole(r.key); if (r.key !== "dealer") setDealerAuthenticated(false); }} style={{
                 display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 999,
                 border: "none", cursor: "pointer", fontWeight: 700, fontSize: 12.5,
                 background: role === r.key ? C.navy : "transparent", color: role === r.key ? C.white : C.grey,
@@ -1879,7 +1935,8 @@ export default function RationSetuApp() {
 
         <div style={{ display: "flex", justifyContent: "center" }}>
           {role === "beneficiary" && <BeneficiaryApp state={state} dispatch={dispatch} lang={lang} setLang={setLang} />}
-          {role === "dealer" && <DealerDashboard state={state} dispatch={dispatch} lang={lang} />}
+          {role === "dealer" && !dealerAuthenticated && <DealerLoginScreen onLogin={() => setDealerAuthenticated(true)} />}
+          {role === "dealer" && dealerAuthenticated && <DealerDashboard state={state} dispatch={dispatch} lang={lang} />}
           {role === "admin" && <AdminDashboard state={state} />}
         </div>
 
