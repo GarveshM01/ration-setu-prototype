@@ -268,9 +268,9 @@ const dict = {
   enterTokenId: { hi: "टोकन संख्या डालें", en: "Enter token number" },
   beneficiary: { hi: "लाभार्थी", en: "Beneficiary" },
   completeDistribution: { hi: "वितरण पूर्ण करें", en: "Complete Distribution" },
-  generateOtp: { hi: "OTP बनाएं", en: "Generate Distribution OTP" },
-  enterDistributionOtp: { hi: "लाभार्थी का OTP दर्ज करें", en: "Enter beneficiary OTP" },
-  otpSentDemo: { hi: "डेमो OTP लाभार्थी को दिया गया:", en: "Demo OTP shown to beneficiary:" },
+  generateOtp: { hi: "वितरण सत्यापन शुरू करें", en: "Start distribution verification" },
+  enterDistributionOtp: { hi: "लाभार्थी का टोकन दोबारा दर्ज करें", en: "Re-enter beneficiary token" },
+  otpSentDemo: { hi: "डेमो में टोकन ही OTP है", en: "In this demo, the token acts as the OTP" },
   otpRequired: { hi: "वितरण पूरा करने के लिए OTP आवश्यक है।", en: "OTP is required to complete distribution." },
   invalidOtp: { hi: "गलत OTP। कृपया लाभार्थी से फिर पूछें।", en: "Incorrect OTP. Ask the beneficiary again." },
   beneficiaryNameOnly: { hi: "केवल लाभार्थी का नाम दिखाया गया है", en: "Only beneficiary name is shown" },
@@ -353,6 +353,10 @@ const dict = {
   cancelTokenConfirm: { hi: "क्या आप यह टोकन रद्द करना चाहते हैं?", en: "Do you want to cancel this token?" },
   tokenCancelled: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" },
   cancelBeforeVisit: { hi: "निर्धारित समय से पहले रद्द किया जा सकता है।", en: "You can cancel before the scheduled time." },
+  entitlementCompare: { hi: "आधिकारिक हक़ बनाम वितरित मात्रा", en: "Official entitlement vs distributed" },
+  auditTimeline: { hi: "वितरण ऑडिट समयरेखा", en: "Distribution audit timeline" },
+  stockAlert: { hi: "दुकान स्टॉक चेतावनी", en: "Shop stock alert" },
+  demoSecurityNote: { hi: "यह डेमो है: असली OTP केवल लाभार्थी के फोन पर भेजा जाएगा।", en: "Demo only: a production OTP must be sent privately to the beneficiary." },
 };
 
 const LangCtx = createContext({ lang: "hi", t: (k) => k });
@@ -389,9 +393,9 @@ const FAMILY_MEMBERS = [
 ];
 
 const RECEIPT_ITEMS_DEFAULT = [
-  { name: { hi: "गेहूं", en: "Wheat" }, qty: "5 kg" },
-  { name: { hi: "चावल", en: "Rice" }, qty: "5 kg" },
-  { name: { hi: "चीनी", en: "Sugar" }, qty: "1 kg" },
+  { name: { hi: "गेहूं", en: "Wheat" }, entitled: "5 kg", qty: "5 kg" },
+  { name: { hi: "चावल", en: "Rice" }, entitled: "5 kg", qty: "5 kg" },
+  { name: { hi: "चीनी", en: "Sugar" }, entitled: "1 kg", qty: "1 kg" },
 ];
 
 const initialState = {
@@ -417,6 +421,9 @@ const initialState = {
   totalToday: 42,
   avgWaitMin: 18,
   pendingDistribution: null,
+  auditLog: [
+    { event: "Token created", detail: "Demo queue initialized", time: "09:00 AM" },
+  ],
 };
 
 const STORAGE_KEY = "ration-setu-demo-state-v1";
@@ -434,6 +441,7 @@ function loadInitialState() {
       notifications: Array.isArray(parsed.notifications) ? parsed.notifications : initialState.notifications,
       history: Array.isArray(parsed.history) ? parsed.history : initialState.history,
       complaints: Array.isArray(parsed.complaints) ? parsed.complaints : initialState.complaints,
+      auditLog: Array.isArray(parsed.auditLog) ? parsed.auditLog : initialState.auditLog,
     };
   } catch {
     return initialState;
@@ -452,6 +460,10 @@ function nextSlotLabel() {
   return `${hour12}:${m.toString().padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
 }
 
+function auditEntry(event, detail) {
+  return { event, detail, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case "BOOK_ONLINE": {
@@ -462,6 +474,7 @@ function reducer(state, action) {
         ...state,
         queue: newQueue,
         userTokenId: "A124",
+        auditLog: [auditEntry("Token created", "A124 online booking"), ...state.auditLog],
         notifications: [
           { icon: "check", title: { hi: "ऑनलाइन स्लॉट पक्का हुआ", en: "Online Slot Confirmed" }, body: { hi: "आपका ऑनलाइन स्लॉट पक्का हो गया है। टोकन A124, 10:30 AM के लिए बुक हुआ।", en: "Your online slot is confirmed. Token A124 booked for 10:30 AM." } },
           ...state.notifications,
@@ -473,7 +486,7 @@ function reducer(state, action) {
       if (state.queue.some((q) => q.id === "A125")) return state;
       const time = nextSlotLabel();
       const newQueue = [...state.queue, { id: "A125", mode: "qr", status: "waiting", time, name: "इमरान खान / Imran Khan" }];
-      return { ...state, queue: newQueue, userTokenId: "A125" };
+      return { ...state, queue: newQueue, userTokenId: "A125", auditLog: [auditEntry("Token created", "A125 offline QR"), ...state.auditLog] };
     }
     case "CANCEL_TOKEN": {
       if (!state.userTokenId) return state;
@@ -483,6 +496,7 @@ function reducer(state, action) {
         ...state,
         queue: state.queue.filter((q) => q.id !== state.userTokenId),
         userTokenId: null,
+        auditLog: [auditEntry("Token cancelled", token.id), ...state.auditLog],
         notifications: [
           { icon: "check", title: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" }, body: { hi: `टोकन ${token.id} रद्द कर दिया गया है।`, en: `Token ${token.id} has been cancelled.` } },
           ...state.notifications,
@@ -492,7 +506,7 @@ function reducer(state, action) {
     case "GENERATE_DISTRIBUTION_OTP": {
       const token = state.queue.find((q) => q.id === action.tokenId);
       if (!token || token.status !== "serving") return state;
-      return { ...state, pendingDistribution: { tokenId: token.id, otp: "4826" } };
+      return { ...state, pendingDistribution: { tokenId: token.id, otp: token.id } };
     }
     case "COMPLETE_DISTRIBUTION": {
       const pending = state.pendingDistribution;
@@ -512,8 +526,13 @@ function reducer(state, action) {
         history: isUserToken && completedToken ? [{
           month: { hi: "सितंबर 2026", en: "September 2026" }, token: completedToken.id, status: "completed",
           date: "15 September 2026", shop: "FPS-102 · Shanti Nagar", txnId: `TXN-20260915-${completedToken.id}`,
-          items: RECEIPT_ITEMS_DEFAULT,
+          items: action.items || RECEIPT_ITEMS_DEFAULT,
+          audit: [auditEntry("Distribution verified", `Token ${pending.tokenId}`), ...state.auditLog],
         }, ...state.history] : state.history,
+        auditLog: [
+          auditEntry("OTP verified", `Token ${pending.tokenId}; distribution recorded`),
+          ...state.auditLog,
+        ],
         notifications: isUserToken ? [
           { icon: "check", title: { hi: "राशन सफलतापूर्वक वितरित हुआ", en: "Ration Distributed Successfully" }, body: { hi: `टोकन ${pending.tokenId} का वितरण OTP से सत्यापित हुआ।`, en: `Distribution for token ${pending.tokenId} was verified by OTP.` } },
           ...state.notifications,
@@ -528,7 +547,12 @@ function reducer(state, action) {
       if (nextIdx !== -1) {
         q[nextIdx] = { ...q[nextIdx], status: "serving" };
       }
-      return { ...state, queue: q };
+      const called = nextIdx === -1 ? null : q[nextIdx];
+      return {
+        ...state,
+        queue: q,
+        auditLog: called ? [auditEntry("Token called", called.id), ...state.auditLog] : state.auditLog,
+      };
     }
     case "MARK_NOSHOW": {
       const q = [...state.queue];
@@ -1087,6 +1111,12 @@ function EntitlementScreen({ onBack, onNav }) {
 
         <p style={{ fontSize: 12.5, color: C.grey, margin: "18px 0 4px" }}>September 2026 · {t(dict.familyMembers)}: {CARD_INFO.familyCount}</p>
         <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "12px 0 10px" }}>{t(dict.entQty)}</p>
+        <div style={{ background: C.goldBg, borderRadius: 12, padding: 11, display: "flex", gap: 8, marginBottom: 12 }}>
+          <AlertTriangle size={15} color="#8A6410" style={{ flexShrink: 0 }} />
+          <p style={{ margin: 0, color: "#7A5A0F", fontSize: 11.5, lineHeight: 1.4 }}>
+            {t(dict.stockAlert)}: {t({ hi: "चीनी सीमित है और मिट्टी का तेल उपलब्ध नहीं है।", en: "Sugar is limited and kerosene is out of stock." })}
+          </p>
+        </div>
         {items.map((it) => (
           <Card key={it.name.en} style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
@@ -1168,7 +1198,19 @@ function ReceiptScreen({ receipt, onBack, lang }) {
         <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.itemsDistributed)}</p>
         <Card style={{ marginBottom: 16 }}>
           {receipt.items.map((it, i) => (
-            <Row key={i} label={it.name[lang]} value={it.qty} last={i === receipt.items.length - 1} />
+            <Row key={i} label={it.name[lang]} value={`${it.qty} / ${it.entitled || it.qty}`} last={i === receipt.items.length - 1} />
+          ))}
+        </Card>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.entitlementCompare)}</p>
+        <Card style={{ marginBottom: 16 }}>
+          {receipt.items.map((it, i) => (
+            <Row key={i} label={it.name[lang]} value={`${it.entitled || it.qty} → ${it.qty}`} last={i === receipt.items.length - 1} />
+          ))}
+        </Card>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.auditTimeline)}</p>
+        <Card style={{ marginBottom: 16 }}>
+          {(receipt.audit || []).slice(0, 6).map((entry, i) => (
+            <Row key={i} label={entry.event} value={entry.time} last={i === Math.min((receipt.audit || []).length, 6) - 1} />
           ))}
         </Card>
         <Btn full variant="outline" icon={IdCard} onClick={() => {}}>{t(dict.downloadReceipt)}</Btn>
@@ -1659,6 +1701,7 @@ function DealerDashboard({ state, dispatch, lang }) {
   const [verified, setVerified] = useState(null);
   const [distributionOtp, setDistributionOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [distributed, setDistributed] = useState({ wheat: "5 kg", rice: "5 kg", sugar: "1 kg" });
 
   const waitingCount = state.queue.filter((q) => q.status === "waiting").length;
   const servingCount = state.queue.filter((q) => q.status === "serving").length;
@@ -1695,7 +1738,16 @@ function DealerDashboard({ state, dispatch, lang }) {
       setOtpError(t(dict.invalidOtp));
       return;
     }
-    dispatch({ type: "COMPLETE_DISTRIBUTION", tokenId: verified.id, otp: distributionOtp });
+    dispatch({
+      type: "COMPLETE_DISTRIBUTION",
+      tokenId: verified.id,
+      otp: distributionOtp,
+      items: [
+        { name: { hi: "गेहूं", en: "Wheat" }, entitled: "5 kg", qty: distributed.wheat },
+        { name: { hi: "चावल", en: "Rice" }, entitled: "5 kg", qty: distributed.rice },
+        { name: { hi: "चीनी", en: "Sugar" }, entitled: "1 kg", qty: distributed.sugar },
+      ],
+    });
     setVerified(null);
     setVerifyId("");
     setDistributionOtp("");
@@ -1785,7 +1837,24 @@ function DealerDashboard({ state, dispatch, lang }) {
                     )}
                     {state.pendingDistribution?.tokenId === verified.id && (
                       <div style={{ marginTop: 12, padding: 12, borderRadius: 10, background: C.greenBg }}>
-                        <p style={{ margin: "0 0 8px", color: C.green, fontSize: 12, fontWeight: 700 }}>{t(dict.otpSentDemo)} <strong>4826</strong></p>
+                        <p style={{ margin: "0 0 8px", color: C.green, fontSize: 12, fontWeight: 700 }}>{t(dict.otpSentDemo)}: <strong>{verified.id}</strong></p>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 8 }}>
+                          {[
+                            ["wheat", "Wheat"],
+                            ["rice", "Rice"],
+                            ["sugar", "Sugar"],
+                          ].map(([key, label]) => (
+                            <label key={key} style={{ fontSize: 10.5, color: C.grey }}>
+                              {label}
+                              <input
+                                value={distributed[key]}
+                                onChange={(e) => setDistributed((current) => ({ ...current, [key]: e.target.value }))}
+                                style={{ width: "100%", border: `1px solid ${C.greyLine}`, borderRadius: 7, padding: "7px 5px", marginTop: 3, fontSize: 11 }}
+                              />
+                            </label>
+                          ))}
+                        </div>
+                        <p style={{ margin: "0 0 8px", color: C.grey, fontSize: 11 }}>{t(dict.demoSecurityNote)}</p>
                         <input
                           value={distributionOtp}
                           onChange={(e) => { setDistributionOtp(e.target.value.replace(/\D/g, "").slice(0, 4)); setOtpError(""); }}
