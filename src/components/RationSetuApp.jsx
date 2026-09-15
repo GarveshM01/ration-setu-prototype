@@ -252,6 +252,7 @@ const dict = {
   demoScript: { hi: "डेमो चरण", en: "Demo Steps" },
   // Dealer
   dealerPortal: { hi: "डीलर पोर्टल", en: "Dealer Portal" },
+  officialPortal: { hi: "आधिकारिक पोर्टल", en: "Official Portal" },
   todaysOverview: { hi: "आज का सारांश", en: "Today's Overview" },
   totalTokens: { hi: "कुल टोकन", en: "Total Tokens" },
   avgWait: { hi: "औसत प्रतीक्षा", en: "Average Wait" },
@@ -273,7 +274,7 @@ const dict = {
   noShows: { hi: "अनुपस्थित", en: "No-Shows" },
   roleSwitch: { hi: "डेमो दृश्य", en: "Demo View" },
   roleBen: { hi: "लाभार्थी", en: "Beneficiary" },
-  roleDealer: { hi: "डीलर", en: "Dealer" },
+  roleDealer: { hi: "आधिकारिक पोर्टल", en: "Official Portal" },
   roleAdmin: { hi: "एडमिन", en: "Admin" },
 
   // e-Ration Card
@@ -336,6 +337,10 @@ const dict = {
   qrTokensLbl: { hi: "QR टोकन", en: "QR Tokens" },
   pendingBeneficiaries: { hi: "प्रतीक्षारत लाभार्थी", en: "Pending Beneficiaries" },
   estCompletion: { hi: "अनुमानित समापन", en: "Est. Completion" },
+  cancelToken: { hi: "टोकन रद्द करें", en: "Cancel Token" },
+  cancelTokenConfirm: { hi: "क्या आप यह टोकन रद्द करना चाहते हैं?", en: "Do you want to cancel this token?" },
+  tokenCancelled: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" },
+  cancelBeforeVisit: { hi: "निर्धारित समय से पहले रद्द किया जा सकता है।", en: "You can cancel before the scheduled time." },
 };
 
 const LangCtx = createContext({ lang: "hi", t: (k) => k });
@@ -455,7 +460,21 @@ function reducer(state, action) {
       if (state.queue.some((q) => q.id === "A125")) return state;
       const time = nextSlotLabel();
       const newQueue = [...state.queue, { id: "A125", mode: "qr", status: "waiting", time, name: "इमरान खान / Imran Khan" }];
-      return { ...state, queue: newQueue };
+      return { ...state, queue: newQueue, userTokenId: "A125" };
+    }
+    case "CANCEL_TOKEN": {
+      if (!state.userTokenId) return state;
+      const token = state.queue.find((q) => q.id === state.userTokenId);
+      if (!token || token.status !== "waiting") return state;
+      return {
+        ...state,
+        queue: state.queue.filter((q) => q.id !== state.userTokenId),
+        userTokenId: null,
+        notifications: [
+          { icon: "check", title: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" }, body: { hi: `टोकन ${token.id} रद्द कर दिया गया है।`, en: `Token ${token.id} has been cancelled.` } },
+          ...state.notifications,
+        ],
+      };
     }
     case "CALL_NEXT": {
       const q = [...state.queue];
@@ -1287,7 +1306,7 @@ function ScanScreen({ state, dispatch, onBack, onDone }) {
   );
 }
 
-function MyTokenScreen({ state, onBack, onNav }) {
+function MyTokenScreen({ state, dispatch, onBack, onNav }) {
   const { t } = useT();
   const userToken = state.queue.find((q) => q.id === state.userTokenId);
   const uIdx = state.queue.findIndex((q) => q.id === state.userTokenId);
@@ -1335,6 +1354,24 @@ function MyTokenScreen({ state, onBack, onNav }) {
           <div style={{ flex: 1 }}><Btn full variant="outline" icon={Users} onClick={() => onNav("queue")}>{t(dict.viewLiveQueue)}</Btn></div>
           <div style={{ flex: 1 }}><Btn full variant="ghost" icon={Navigation} onClick={() => {}}>{t(dict.getDirections)}</Btn></div>
         </div>
+        {userToken.status === "waiting" && (
+          <div style={{ marginTop: 12 }}>
+            <Btn
+              full
+              variant="danger"
+              icon={AlertTriangle}
+              onClick={() => {
+                if (window.confirm(t(dict.cancelTokenConfirm))) {
+                  dispatch({ type: "CANCEL_TOKEN" });
+                  onNav("home");
+                }
+              }}
+            >
+              {t(dict.cancelToken)}
+            </Btn>
+            <p style={{ margin: "8px 0 0", textAlign: "center", fontSize: 11.5, color: C.grey }}>{t(dict.cancelBeforeVisit)}</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1518,7 +1555,7 @@ function BeneficiaryApp({ state, dispatch, lang, setLang }) {
       content = <ScanScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onDone={() => goTab("queue")} />;
       break;
     case "token":
-      content = <MyTokenScreen state={state} onBack={() => setScreen("home")} onNav={setScreen} />;
+      content = <MyTokenScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onNav={setScreen} />;
       break;
     case "queue":
       content = <LiveQueueScreen state={state} lang={lang} />;
@@ -1580,7 +1617,7 @@ function DealerDashboard({ state, dispatch, lang }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, flexWrap: "wrap", gap: 10 }}>
         <Logo size={36} />
         <div style={{ textAlign: "right" }}>
-          <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14 }}>{t(dict.dealerPortal)}</p>
+          <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14 }}>{t(dict.officialPortal)}</p>
           <p style={{ margin: 0, fontSize: 12, color: C.grey }}>FPS-102 · Shanti Nagar</p>
         </div>
       </div>
