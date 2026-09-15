@@ -987,7 +987,22 @@ function HomeScreen({ state, dispatch, onNav, lang, setLang }) {
           </div>
         </div>
         {userToken && (
-          <p style={{ fontSize: 12, color: C.grey, margin: "10px 0 0" }}>{t(dict.estWait)}: <b style={{ color: C.navy }}>{ahead * 6} {t(dict.min)}</b></p>
+          <div style={{ marginTop: 10 }}>
+            <p style={{ fontSize: 12, color: C.grey, margin: "0 0 10px" }}>{t(dict.estWait)}: <b style={{ color: C.navy }}>{ahead * 6} {t(dict.min)}</b></p>
+            {userToken.status === "waiting" && (
+              <Btn
+                full
+                size="sm"
+                variant="danger"
+                icon={AlertTriangle}
+                onClick={() => {
+                  if (window.confirm(t(dict.cancelTokenConfirm))) dispatch({ type: "CANCEL_TOKEN" });
+                }}
+              >
+                {t(dict.cancelToken)}
+              </Btn>
+            )}
+          </div>
         )}
       </Card>
 
