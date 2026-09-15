@@ -268,6 +268,12 @@ const dict = {
   enterTokenId: { hi: "टोकन संख्या डालें", en: "Enter token number" },
   beneficiary: { hi: "लाभार्थी", en: "Beneficiary" },
   completeDistribution: { hi: "वितरण पूर्ण करें", en: "Complete Distribution" },
+  generateOtp: { hi: "OTP बनाएं", en: "Generate Distribution OTP" },
+  enterDistributionOtp: { hi: "लाभार्थी का OTP दर्ज करें", en: "Enter beneficiary OTP" },
+  otpSentDemo: { hi: "डेमो OTP लाभार्थी को दिया गया:", en: "Demo OTP shown to beneficiary:" },
+  otpRequired: { hi: "वितरण पूरा करने के लिए OTP आवश्यक है।", en: "OTP is required to complete distribution." },
+  invalidOtp: { hi: "गलत OTP। कृपया लाभार्थी से फिर पूछें।", en: "Incorrect OTP. Ask the beneficiary again." },
+  beneficiaryNameOnly: { hi: "केवल लाभार्थी का नाम दिखाया गया है", en: "Only beneficiary name is shown" },
   distCompleted: { hi: "वितरण पूर्ण हुआ ✓", en: "Distribution Completed ✓" },
   mode: { hi: "तरीका", en: "Mode" },
   time: { hi: "समय", en: "Time" },
@@ -410,6 +416,7 @@ const initialState = {
   completedCount: 34,
   totalToday: 42,
   avgWaitMin: 18,
+  pendingDistribution: null,
 };
 
 const STORAGE_KEY = "ration-setu-demo-state-v1";
@@ -482,59 +489,46 @@ function reducer(state, action) {
         ],
       };
     }
+    case "GENERATE_DISTRIBUTION_OTP": {
+      const token = state.queue.find((q) => q.id === action.tokenId);
+      if (!token || token.status !== "serving") return state;
+      return { ...state, pendingDistribution: { tokenId: token.id, otp: "4826" } };
+    }
+    case "COMPLETE_DISTRIBUTION": {
+      const pending = state.pendingDistribution;
+      if (!pending || pending.tokenId !== action.tokenId || pending.otp !== action.otp) return state;
+      const completedQueue = state.queue.map((q) => q.id === pending.tokenId ? { ...q, status: "completed" } : q);
+      const nextWaiting = completedQueue.findIndex((q) => q.status === "waiting");
+      const queue = nextWaiting === -1
+        ? completedQueue
+        : completedQueue.map((q, index) => index === nextWaiting ? { ...q, status: "serving" } : q);
+      const completedToken = state.queue.find((q) => q.id === pending.tokenId);
+      const isUserToken = pending.tokenId === state.userTokenId;
+      return {
+        ...state,
+        queue,
+        pendingDistribution: null,
+        completedCount: state.completedCount + 1,
+        history: isUserToken && completedToken ? [{
+          month: { hi: "सितंबर 2026", en: "September 2026" }, token: completedToken.id, status: "completed",
+          date: "15 September 2026", shop: "FPS-102 · Shanti Nagar", txnId: `TXN-20260915-${completedToken.id}`,
+          items: RECEIPT_ITEMS_DEFAULT,
+        }, ...state.history] : state.history,
+        notifications: isUserToken ? [
+          { icon: "check", title: { hi: "राशन सफलतापूर्वक वितरित हुआ", en: "Ration Distributed Successfully" }, body: { hi: `टोकन ${pending.tokenId} का वितरण OTP से सत्यापित हुआ।`, en: `Distribution for token ${pending.tokenId} was verified by OTP.` } },
+          ...state.notifications,
+        ] : state.notifications,
+      };
+    }
     case "CALL_NEXT": {
       const q = [...state.queue];
       const servingIdx = q.findIndex((t) => t.status === "serving");
-      let newHistory = state.history;
-      let completedCount = state.completedCount;
-      let notifications = state.notifications;
-      if (servingIdx !== -1) {
-        const servedToken = q[servingIdx];
-        q[servingIdx] = { ...servedToken, status: "completed" };
-        completedCount += 1;
-        if (servedToken.id === state.userTokenId) {
-          const now = new Date();
-          const dateStr = "12 September 2026";
-          newHistory = [
-            {
-              month: { hi: "सितंबर 2026", en: "September 2026" }, token: servedToken.id, status: "completed",
-              date: dateStr, shop: "FPS-102 · Shanti Nagar", txnId: `TXN-20260912-${servedToken.id}`,
-              items: RECEIPT_ITEMS_DEFAULT,
-            },
-            ...state.history,
-          ];
-          notifications = [
-            { icon: "check", title: { hi: "राशन लेन-देन पूर्ण हुआ", en: "Ration Transaction Completed" }, body: { hi: "आपका राशन लेन-देन पूर्ण हो गया है।", en: "Your ration transaction has been completed." } },
-            ...notifications,
-          ];
-        }
-      }
+      if (servingIdx !== -1) return state;
       const nextIdx = q.findIndex((t) => t.status === "waiting");
       if (nextIdx !== -1) {
         q[nextIdx] = { ...q[nextIdx], status: "serving" };
-        if (q[nextIdx].id === state.userTokenId) {
-          notifications = [
-            { icon: "bell", title: { hi: "कृपया दुकान पर पहुंचें", en: "Please Reach the Ration Shop" }, body: { hi: `कृपया टोकन ${q[nextIdx].id} के साथ काउंटर पर आएं।`, en: `Please reach the ration shop with token ${q[nextIdx].id}.` } },
-            ...notifications,
-          ];
-        }
       }
-      // approaching-turn notification: if user token is waiting and now has <=2 ahead
-      const uIdx = q.findIndex((t) => t.id === state.userTokenId);
-      if (uIdx !== -1 && q[uIdx].status === "waiting") {
-        const ahead = q.slice(0, uIdx).filter((t) => t.status === "waiting" || t.status === "serving").length;
-        if (ahead <= 2 && ahead > 0) {
-          const already = notifications.some((n) => n._tag === "approach");
-          if (!already) {
-            const mins = ahead * 6;
-            notifications = [
-              { icon: "bell", _tag: "approach", title: { hi: "आपकी बारी आने वाली है", en: "Your Turn is Approaching" }, body: { hi: `आपकी बारी लगभग ${mins} मिनट में आ जाएगी। कृपया दुकान की ओर बढ़ें।`, en: `Your turn is approximately ${mins} minutes away. Please head to the shop.` } },
-              ...notifications,
-            ];
-          }
-        }
-      }
-      return { ...state, queue: q, history: newHistory, completedCount, notifications };
+      return { ...state, queue: q };
     }
     case "MARK_NOSHOW": {
       const q = [...state.queue];
@@ -1648,6 +1642,8 @@ function DealerDashboard({ state, dispatch, lang }) {
   const { t } = useT();
   const [verifyId, setVerifyId] = useState("");
   const [verified, setVerified] = useState(null);
+  const [distributionOtp, setDistributionOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
 
   const waitingCount = state.queue.filter((q) => q.status === "waiting").length;
   const servingCount = state.queue.filter((q) => q.status === "serving").length;
@@ -1664,7 +1660,31 @@ function DealerDashboard({ state, dispatch, lang }) {
 
   const doVerify = () => {
     const found = state.queue.find((q) => q.id.toUpperCase() === verifyId.trim().toUpperCase());
-    setVerified(found || "notfound");
+    setDistributionOtp("");
+    setOtpError("");
+    setVerified(found && found.status !== "completed" && found.status !== "noshow" ? found : "notfound");
+  };
+
+  const generateOtp = () => {
+    dispatch({ type: "GENERATE_DISTRIBUTION_OTP", tokenId: verified.id });
+    setDistributionOtp("");
+    setOtpError("");
+  };
+
+  const completeWithOtp = () => {
+    if (!state.pendingDistribution || state.pendingDistribution.tokenId !== verified.id) {
+      setOtpError(t(dict.otpRequired));
+      return;
+    }
+    if (distributionOtp !== state.pendingDistribution.otp) {
+      setOtpError(t(dict.invalidOtp));
+      return;
+    }
+    dispatch({ type: "COMPLETE_DISTRIBUTION", tokenId: verified.id, otp: distributionOtp });
+    setVerified(null);
+    setVerifyId("");
+    setDistributionOtp("");
+    setOtpError("");
   };
 
   return (
@@ -1706,7 +1726,7 @@ function DealerDashboard({ state, dispatch, lang }) {
               <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
                 <thead>
                   <tr style={{ background: C.cream }}>
-                    {[t(dict.token), t(dict.mode), t(dict.time), t(dict.status)].map((h) => (
+                    {[t(dict.token), t(dict.beneficiary), t(dict.status)].map((h) => (
                       <th key={h} style={{ textAlign: "left", padding: "10px 14px", fontSize: 11, color: C.grey, fontWeight: 700 }}>{h}</th>
                     ))}
                   </tr>
@@ -1715,8 +1735,7 @@ function DealerDashboard({ state, dispatch, lang }) {
                   {visible.map((q) => (
                     <tr key={q.id} style={{ borderTop: `1px solid ${C.greyLine}`, background: q.status === "serving" ? C.greenBg : "transparent" }}>
                       <td style={{ padding: "11px 14px", fontWeight: 800, color: C.navy, fontFamily: "Poppins, sans-serif" }}>{q.id}</td>
-                      <td style={{ padding: "11px 14px" }}><ModePill mode={q.mode} /></td>
-                      <td style={{ padding: "11px 14px", fontSize: 13, color: C.grey }}>{q.time}</td>
+                      <td style={{ padding: "11px 14px", fontSize: 13, color: C.navy, fontWeight: 600 }}>{q.name.split(" / ")[1] || q.name}</td>
                       <td style={{ padding: "11px 14px" }}><StatusPill status={q.status} /></td>
                     </tr>
                   ))}
@@ -1743,13 +1762,26 @@ function DealerDashboard({ state, dispatch, lang }) {
               <div>
                 <Row label={t(dict.token)} value={verified.id} />
                 <Row label={t(dict.beneficiary)} value={verified.name.split(" / ")[1] || verified.name} />
-                <Row label={t(dict.mode)} value={verified.mode === "online" ? t(dict.onlineTokenLbl) : t(dict.qrTokenLbl)} />
                 <Row label={t(dict.status)} value={<StatusPill status={verified.status} />} last />
                 {verified.status === "serving" && (
                   <div style={{ marginTop: 12 }}>
-                    <Btn full size="sm" variant="green" icon={CheckCircle2} onClick={() => { dispatch({ type: "CALL_NEXT" }); setVerified(null); setVerifyId(""); }}>
-                      {t(dict.completeDistribution)}
-                    </Btn>
+                    {!state.pendingDistribution && (
+                      <Btn full size="sm" variant="green" icon={KeyRound} onClick={generateOtp}>{t(dict.generateOtp)}</Btn>
+                    )}
+                    {state.pendingDistribution?.tokenId === verified.id && (
+                      <div style={{ marginTop: 12, padding: 12, borderRadius: 10, background: C.greenBg }}>
+                        <p style={{ margin: "0 0 8px", color: C.green, fontSize: 12, fontWeight: 700 }}>{t(dict.otpSentDemo)} <strong>4826</strong></p>
+                        <input
+                          value={distributionOtp}
+                          onChange={(e) => { setDistributionOtp(e.target.value.replace(/\D/g, "").slice(0, 4)); setOtpError(""); }}
+                          placeholder="••••"
+                          inputMode="numeric"
+                          style={{ width: "100%", border: `1.5px solid ${C.greyLine}`, borderRadius: 9, padding: "10px 12px", fontSize: 16, letterSpacing: 5, textAlign: "center", outline: "none", marginBottom: 8 }}
+                        />
+                        {otpError && <p style={{ margin: "0 0 8px", color: C.red, fontSize: 11.5 }}>{otpError}</p>}
+                        <Btn full size="sm" variant="green" icon={CheckCircle2} disabled={distributionOtp.length !== 4} onClick={completeWithOtp}>{t(dict.completeDistribution)}</Btn>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
