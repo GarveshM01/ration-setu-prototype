@@ -1,0 +1,3132 @@
+import React, { useState, useReducer, useMemo, useEffect, createContext, useContext } from "react";
+
+/* =========================================================================
+   INLINE ICON SET — no external icon library. Lucide-style 24x24 stroke
+   icons, hand-drawn as plain SVG so the artifact runs with zero extra deps.
+   ========================================================================= */
+function IconBase({ children, size = 24, color = "currentColor", strokeWidth = 2, style, ...rest }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
+      style={style} {...rest}
+    >
+      {children}
+    </svg>
+  );
+}
+
+const Home = (p) => (
+  <IconBase {...p}><path d="M3 11l9-7 9 7" /><path d="M5 10v9a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1v-9" /></IconBase>
+);
+const Ticket = (p) => (
+  <IconBase {...p}>
+    <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z" />
+    <path d="M13 6v2M13 11v2M13 16v2" />
+  </IconBase>
+);
+const QrCode = (p) => (
+  <IconBase {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <path d="M14 14h3v3h-3zM19 14h2v2M14 19h2M19 19h2v2h-2" />
+  </IconBase>
+);
+const Users = (p) => (
+  <IconBase {...p}>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </IconBase>
+);
+const Bell = (p) => (
+  <IconBase {...p}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></IconBase>
+);
+const User = (p) => (
+  <IconBase {...p}><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" /></IconBase>
+);
+const ChevronLeft = (p) => <IconBase {...p}><path d="M15 18l-6-6 6-6" /></IconBase>;
+const CheckCircle2 = (p) => (
+  <IconBase {...p}><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></IconBase>
+);
+const Wheat = (p) => (
+  <IconBase {...p}>
+    <path d="M12 22V4" /><path d="M8 6l4-2 4 2" /><path d="M8 10l4-2 4 2" /><path d="M8 14l4-2 4 2" /><path d="M9 22h6" />
+  </IconBase>
+);
+const History = (p) => (
+  <IconBase {...p}><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /><path d="M12 7v5l4 2" /></IconBase>
+);
+const ShieldCheck = (p) => (
+  <IconBase {...p}><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" /><path d="M9 12l2 2 4-4" /></IconBase>
+);
+const LayoutDashboard = (p) => (
+  <IconBase {...p}>
+    <rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" />
+    <rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" />
+  </IconBase>
+);
+const Languages = (p) => (
+  <IconBase {...p}>
+    <path d="M4 5h7" /><path d="M7 3v2c0 4-2 7-5 8" /><path d="M3 13c2 0 4-1 5-3" />
+    <path d="M13 21l4-9 4 9" /><path d="M14.5 18h5" />
+  </IconBase>
+);
+const ArrowRight = (p) => <IconBase {...p}><path d="M5 12h14" /><path d="M13 6l6 6-6 6" /></IconBase>;
+const Scan = (p) => (
+  <IconBase {...p}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M3 12h18" />
+  </IconBase>
+);
+const LogOut = (p) => (
+  <IconBase {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></IconBase>
+);
+const Info = (p) => (
+  <IconBase {...p}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></IconBase>
+);
+const TrendingUp = (p) => <IconBase {...p}><path d="M3 17l6-6 4 4 7-8" /><path d="M15 7h5v5" /></IconBase>;
+const BarChart3 = (p) => (
+  <IconBase {...p}>
+    <path d="M3 3v18h18" /><rect x="7" y="12" width="3" height="6" /><rect x="12" y="8" width="3" height="10" /><rect x="17" y="5" width="3" height="13" />
+  </IconBase>
+);
+const AlertTriangle = (p) => (
+  <IconBase {...p}><path d="M12 2L1 21h22L12 2z" /><path d="M12 9v5" /><path d="M12 17h.01" /></IconBase>
+);
+const Package = (p) => (
+  <IconBase {...p}><path d="M21 8l-9-5-9 5 9 5 9-5z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></IconBase>
+);
+const Phone = (p) => (
+  <IconBase {...p}>
+    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z" />
+  </IconBase>
+);
+const KeyRound = (p) => (
+  <IconBase {...p}><circle cx="8" cy="15" r="4" /><path d="M10.5 12.5L20 3" /><path d="M17 6l3 3" /><path d="M14 9l2 2" /></IconBase>
+);
+const IdCard = (p) => (
+  <IconBase {...p}><rect x="2" y="5" width="20" height="14" rx="2" /><circle cx="8" cy="12" r="2" /><path d="M13 10h6" /><path d="M13 14h4" /></IconBase>
+);
+const Navigation = (p) => <IconBase {...p}><path d="M3 11l18-8-8 18-2-8-8-2z" /></IconBase>;
+const ClipboardCheck = (p) => (
+  <IconBase {...p}><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M9 4V2h6v2" /><path d="M9 12l2 2 4-4" /></IconBase>
+);
+const Sparkles = (p) => (
+  <IconBase {...p}>
+    <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z" />
+    <path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9z" />
+  </IconBase>
+);
+const ScanLine = (p) => (
+  <IconBase {...p}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><path d="M3 12h18" />
+  </IconBase>
+);
+const UserCheck = (p) => (
+  <IconBase {...p}><circle cx="9" cy="8" r="4" /><path d="M2 21v-1a6 6 0 0 1 6-6h2" /><path d="M17 12l2 2 4-4" /></IconBase>
+);
+const RefreshCw = (p) => (
+  <IconBase {...p}><path d="M21 12a9 9 0 1 1-2.6-6.4" /><path d="M21 4v5h-5" /></IconBase>
+);
+
+/* =========================================================================
+   RATION SETU — Student Innovation Prototype (SIH)
+   Design tokens
+   ========================================================================= */
+const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');`;
+
+/* Official Ration Setu logo (provided asset, unmodified) */
+import RATION_SETU_LOGO from "../assets/ration-setu-logo.png";
+import { isSupabaseConfigured, saveWhatsAppMessage } from "../services/whatsappRepository.js";
+import { findBeneficiary, listDemoBeneficiaries, getBeneficiarySource, fetchBeneficiary } from "../services/beneficiaryRepository.js";
+const LOGO_SRC = RATION_SETU_LOGO;
+
+const C = {
+  navy: "var(--rs-navy)",
+  navyDeep: "var(--rs-navy-deep)",
+  indigo: "var(--rs-indigo)",
+  bg: "var(--rs-bg)",
+  cream: "var(--rs-surface-muted)",
+  surfaceMuted: "var(--rs-surface-muted)",
+  green: "var(--rs-green)",
+  greenBg: "var(--rs-green-bg)",
+  gold: "var(--rs-gold)",
+  goldBg: "var(--rs-gold-bg)",
+  red: "var(--rs-red)",
+  redBg: "var(--rs-red-bg)",
+  warningText: "var(--rs-warning-text)",
+  infoBg: "var(--rs-info-bg)",
+  infoText: "var(--rs-info-text)",
+  grey: "var(--rs-text-muted)",
+  greyLine: "var(--rs-border)",
+  white: "var(--rs-surface)",
+};
+
+/* =========================================================================
+   TRANSLATIONS
+   ========================================================================= */
+const dict = {
+  appName: { hi: "राशन सेतु", en: "Ration Setu" },
+  tagline: { hi: "राशन लेना, अब आसान।", en: "Ration Lena, Ab Aasan." },
+  usp: { hi: "एक कतार। दो तरीके। कम इंतज़ार।", en: "One Queue. Two Ways. Less Waiting." },
+  studentProto: { hi: "छात्र नवाचार प्रोटोटाइप", en: "Student Innovation Prototype" },
+  getStarted: { hi: "शुरू करें", en: "Get Started" },
+  welcome: { hi: "राशन सेतु में स्वागत है", en: "Welcome to Ration Setu" },
+  mobileNumber: { hi: "मोबाइल नंबर", en: "Mobile Number" },
+  sendOtp: { hi: "OTP भेजें", en: "Send OTP" },
+  enterOtp: { hi: "OTP दर्ज करें", en: "Enter OTP" },
+  demoOtpHint: { hi: "डेमो हेतु कोई भी 6 अंक डालें", en: "Demo: enter any 6 digits" },
+  verify: { hi: "सत्यापित करें", en: "Verify" },
+  rationCardNumber: { hi: "राशन कार्ड नंबर", en: "Ration Card Number" },
+  continue: { hi: "आगे बढ़ें", en: "Continue" },
+  namaste: { hi: "नमस्ते", en: "Namaste" },
+  myRationCard: { hi: "मेरा राशन कार्ड", en: "My Ration Card" },
+  familyMembers: { hi: "परिवार सदस्य", en: "Family Members" },
+  assignedFps: { hi: "आवंटित दुकान", en: "Assigned FPS" },
+  myEntitlement: { hi: "मेरा हक़", en: "My Entitlement" },
+  currentQueue: { hi: "वर्तमान कतार स्थिति", en: "Current Queue Status" },
+  nowServing: { hi: "अभी सेवा में", en: "Now Serving" },
+  myToken: { hi: "मेरा टोकन", en: "My Token" },
+  peopleAhead: { hi: "आगे लोग", en: "People Ahead" },
+  estWait: { hi: "अनुमानित प्रतीक्षा", en: "Estimated Wait" },
+  min: { hi: "मिनट", en: "min" },
+  bookToken: { hi: "ऑनलाइन स्लॉट बुक करें", en: "Book Online Slot" },
+  scanFpsQr: { hi: "ऑफ़लाइन QR टोकन प्राप्त करें", en: "Get Offline QR Token" },
+  bookOnlineDesc: { hi: "घर से समय चुनें", en: "Choose a time from home" },
+  offlineQrDesc: { hi: "दुकान पर QR स्कैन करें", en: "Scan QR at the shop" },
+  viewRationDetails: { hi: "राशन विवरण देखें", en: "View Ration Details" },
+  noTokenYet: { hi: "अभी कोई टोकन बुक नहीं है", en: "No token booked yet" },
+  bookNow: { hi: "अभी बुक करें", en: "Book Now" },
+  home: { hi: "होम", en: "Home" },
+  queue: { hi: "कतार", en: "Queue" },
+  notif: { hi: "सूचनाएं", en: "Alerts" },
+  profile: { hi: "प्रोफ़ाइल", en: "Profile" },
+  entitlementTitle: { hi: "राशन हक़ विवरण", en: "Ration Entitlement" },
+  entQty: { hi: "आवंटित मात्रा", en: "Entitled Quantity" },
+  availAtFps: { hi: "आपकी दुकान पर उपलब्धता", en: "Available at Assigned FPS" },
+  entNote: {
+    hi: "यहाँ दिखाया गया हक़ आपकी पंजीकृत PDS जानकारी पर आधारित है। यह डेमो डेटा है।",
+    en: "Entitlement shown is based on your registered PDS information. This is demo data.",
+  },
+  available: { hi: "उपलब्ध", en: "Available" },
+  limited: { hi: "सीमित", en: "Limited" },
+  unavailable: { hi: "अनुपलब्ध", en: "Unavailable" },
+  bookSlotTitle: { hi: "अपनी बारी बुक करें", en: "Book Your Distribution Slot" },
+  distActive: { hi: "वितरण चालू है", en: "Distribution Active" },
+  chooseSlot: { hi: "समय चुनें", en: "Choose a time slot" },
+  confirmToken: { hi: "टोकन पक्का करें", en: "Confirm Token" },
+  slotCapacityNote: {
+    hi: "क्षमता ऑनलाइन और QR दोनों उपयोगकर्ताओं के लिए साझा है — यह लचीला रहता है।",
+    en: "Capacity is shared between online and QR users — it stays flexible.",
+  },
+  unifiedTitle: { hi: "दो तरीके। एक कतार।", en: "Two Ways to Join. One Fair Queue." },
+  unifiedSub: {
+    hi: "घर से टोकन बुक करें या दुकान पर QR स्कैन करें — दोनों एक ही कतार में जुड़ते हैं।",
+    en: "Book from home or scan QR at the shop — both enter the same queue.",
+  },
+  onlineTokenLbl: { hi: "ऑनलाइन टोकन", en: "Online Token" },
+  qrTokenLbl: { hi: "QR / ऑफ़लाइन टोकन", en: "QR / Offline Token" },
+  unifiedQueueLbl: { hi: "एकीकृत कतार", en: "Unified Queue" },
+  scanTitle: { hi: "दुकान का QR स्कैन करें", en: "Scan FPS QR" },
+  scanSub: { hi: "क्या आप दुकान पर हैं? QR स्कैन करके कतार में शामिल हों।", en: "At the ration shop? Scan the QR to join the queue." },
+  tapToScan: { hi: "स्कैन करने हेतु टैप करें (डेमो)", en: "Tap to simulate scan" },
+  fpsVerified: { hi: "दुकान सत्यापित ✓", en: "FPS Verified ✓" },
+  verifyDetails: { hi: "अपना विवरण जांचें", en: "Verify your details" },
+  generateToken: { hi: "टोकन बनाएं", en: "Generate Token" },
+  yourToken: { hi: "आपका टोकन", en: "Your Token" },
+  scheduled: { hi: "निर्धारित समय", en: "Scheduled" },
+  status: { hi: "स्थिति", en: "Status" },
+  waiting: { hi: "प्रतीक्षा में", en: "Waiting" },
+  serving: { hi: "सेवा में", en: "Serving" },
+  completed: { hi: "पूर्ण", en: "Completed" },
+  noshow: { hi: "अनुपस्थित", en: "No Show" },
+  viewLiveQueue: { hi: "लाइव कतार देखें", en: "View Live Queue" },
+  getDirections: { hi: "रास्ता दिखाएं", en: "Get Directions" },
+  liveQueueTitle: { hi: "लाइव कतार", en: "Live Queue" },
+  upcomingTokens: { hi: "आगामी टोकन", en: "Upcoming Tokens" },
+  yourTokenTag: { hi: "आपका टोकन", en: "Your token" },
+  notifTitle: { hi: "सूचनाएं", en: "Notifications" },
+  historyTitle: { hi: "राशन इतिहास", en: "Transaction History" },
+  noHistoryYet: { hi: "अभी तक कोई नई प्राप्ति नहीं", en: "No new distribution yet" },
+  profileTitle: { hi: "प्रोफ़ाइल", en: "Profile" },
+  logout: { hi: "लॉग आउट", en: "Log Out" },
+  fpsStock: { hi: "दुकान स्टॉक स्थिति", en: "FPS Stock Status" },
+  disclaimerShort: {
+    hi: "यह एक छात्र प्रोटोटाइप है — सरकारी डेटाबेस से नहीं जुड़ा।",
+    en: "This is a student prototype — not connected to any government database.",
+  },
+  demoScript: { hi: "डेमो चरण", en: "Demo Steps" },
+  // Dealer
+  dealerPortal: { hi: "डीलर पोर्टल", en: "Dealer Portal" },
+  officialPortal: { hi: "आधिकारिक पोर्टल", en: "Official Portal" },
+  dealerLogin: { hi: "डीलर लॉगिन", en: "Dealer Login" },
+  dealerId: { hi: "FPS / डीलर ID", en: "FPS / Dealer ID" },
+  dealerPin: { hi: "सुरक्षा PIN", en: "Security PIN" },
+  dealerSignIn: { hi: "पोर्टल में प्रवेश करें", en: "Sign in to portal" },
+  demoDealerHint: { hi: "डेमो: FPS-102 और PIN 1234", en: "Demo: FPS-102 and PIN 1234" },
+  invalidDealerLogin: { hi: "गलत ID या PIN। डेमो विवरण जांचें।", en: "Incorrect ID or PIN. Check the demo details." },
+  todaysOverview: { hi: "आज का सारांश", en: "Today's Overview" },
+  totalTokens: { hi: "कुल टोकन", en: "Total Tokens" },
+  avgWait: { hi: "औसत प्रतीक्षा", en: "Average Wait" },
+  callNext: { hi: "अगला टोकन बुलाएं", en: "Call Next Token" },
+  markNoShow: { hi: "अनुपस्थित घोषित करें", en: "Mark No-Show" },
+  verifyToken: { hi: "टोकन सत्यापित करें", en: "Verify Token" },
+  enterTokenId: { hi: "टोकन संख्या डालें", en: "Enter token number" },
+  beneficiary: { hi: "लाभार्थी", en: "Beneficiary" },
+  completeDistribution: { hi: "वितरण पूर्ण करें", en: "Complete Distribution" },
+  generateOtp: { hi: "वितरण सत्यापन शुरू करें", en: "Start distribution verification" },
+  enterDistributionOtp: { hi: "लाभार्थी का टोकन दोबारा दर्ज करें", en: "Re-enter beneficiary token" },
+  otpSentDemo: { hi: "डेमो में टोकन ही OTP है", en: "In this demo, the token acts as the OTP" },
+  otpRequired: { hi: "वितरण पूरा करने के लिए OTP आवश्यक है।", en: "OTP is required to complete distribution." },
+  invalidOtp: { hi: "गलत OTP। कृपया लाभार्थी से फिर पूछें।", en: "Incorrect OTP. Ask the beneficiary again." },
+  beneficiaryNameOnly: { hi: "केवल लाभार्थी का नाम दिखाया गया है", en: "Only beneficiary name is shown" },
+  distCompleted: { hi: "वितरण पूर्ण हुआ ✓", en: "Distribution Completed ✓" },
+  mode: { hi: "तरीका", en: "Mode" },
+  time: { hi: "समय", en: "Time" },
+  token: { hi: "टोकन", en: "Token" },
+  // Admin
+  adminPortal: { hi: "एडमिन विश्लेषण", en: "Admin Analytics" },
+  aiPrediction: { hi: "AI-सहायित अनुमान", en: "AI-assisted Prediction" },
+  aiAnomaly: { hi: "AI असामान्यता चेतावनी", en: "AI Anomaly Alert" },
+  aiDemand: { hi: "AI मांग पूर्वानुमान", en: "AI Demand Forecast" },
+  noShows: { hi: "अनुपस्थित", en: "No-Shows" },
+  roleSwitch: { hi: "डेमो दृश्य", en: "Demo View" },
+  roleBen: { hi: "लाभार्थी", en: "Beneficiary" },
+  roleDealer: { hi: "आधिकारिक पोर्टल", en: "Official Portal" },
+  roleAdmin: { hi: "एडमिन", en: "Admin" },
+
+  // e-Ration Card
+  eCardTitle: { hi: "डिजिटल ई-राशन कार्ड", en: "Digital e-Ration Card" },
+  cardType: { hi: "कार्ड प्रकार", en: "Card Type" },
+  cardCategory: { hi: "श्रेणी", en: "Category" },
+  ekycStatus: { hi: "e-KYC स्थिति", en: "e-KYC Status" },
+  ekycVerified: { hi: "सत्यापित", en: "Verified" },
+  ekycPending: { hi: "लंबित", en: "Pending" },
+  priorityHousehold: { hi: "प्राथमिकता परिवार (PHH)", en: "Priority Household (PHH)" },
+  issuedQty: { hi: "वितरित", en: "Issued" },
+  remainingQty: { hi: "शेष", en: "Remaining" },
+
+  // Family
+  viewFamily: { hi: "परिवार देखें", en: "View Family" },
+  familyTitle: { hi: "परिवार सदस्य", en: "Family Members" },
+  relationship: { hi: "संबंध", en: "Relationship" },
+  age: { hi: "आयु", en: "Age" },
+  self: { hi: "स्वयं", en: "Self" },
+  spouse: { hi: "पति/पत्नी", en: "Spouse" },
+  son: { hi: "पुत्र", en: "Son" },
+  daughter: { hi: "पुत्री", en: "Daughter" },
+  mother: { hi: "माता", en: "Mother" },
+
+  // Receipts / history
+  viewReceipt: { hi: "रसीद देखें", en: "View Receipt" },
+  receiptTitle: { hi: "डिजिटल रसीद", en: "Digital Receipt" },
+  transactionId: { hi: "लेन-देन ID", en: "Transaction ID" },
+  date: { hi: "तारीख", en: "Date" },
+  shop: { hi: "दुकान", en: "Shop" },
+  itemsDistributed: { hi: "वितरित सामग्री", en: "Items Distributed" },
+  downloadReceipt: { hi: "रसीद डाउनलोड करें", en: "Download Receipt" },
+
+  // Stock
+  outOfStock: { hi: "अनुपलब्ध", en: "Out of Stock" },
+  shopLevelNote: { hi: "यह जानकारी केवल आपकी दुकान के स्तर पर है।", en: "This information is at your assigned shop's level only." },
+
+  // Complaints
+  complaintsTitle: { hi: "शिकायत / विसंगति", en: "Complaints / Discrepancy" },
+  fileComplaint: { hi: "+ नई शिकायत दर्ज करें", en: "+ File a New Complaint" },
+  noComplaintsYet: { hi: "अभी तक कोई शिकायत दर्ज नहीं", en: "No complaints filed yet" },
+  complaintId: { hi: "शिकायत ID", en: "Complaint ID" },
+  complaintType: { hi: "समस्या का प्रकार चुनें", en: "Select issue type" },
+  complaintDesc: { hi: "समस्या का विवरण (वैकल्पिक)", en: "Describe the issue (optional)" },
+  submitComplaint: { hi: "शिकायत जमा करें", en: "Submit Complaint" },
+  statusSubmitted: { hi: "जमा हुई", en: "Submitted" },
+  statusReview: { hi: "समीक्षा में", en: "Under Review" },
+  statusResolved: { hi: "समाधान हुआ", en: "Resolved" },
+  advanceDemo: { hi: "स्थिति अपडेट करें (डेमो)", en: "Update Status (demo)" },
+  issueUnderweigh: { hi: "कम तौल", en: "Under-weighing" },
+  issueWrongQty: { hi: "गलत मात्रा", en: "Incorrect quantity" },
+  issueNoStock: { hi: "स्टॉक अनुपलब्ध", en: "Stock unavailable" },
+  issueNotReceived: { hi: "लेन-देन दिखा पर राशन नहीं मिला", en: "Transaction shown but ration not received" },
+  issueDealer: { hi: "डीलर संबंधी समस्या", en: "Dealer-related issue" },
+  issueOther: { hi: "अन्य समस्या", en: "Other issue" },
+  optionalTokenRef: { hi: "संबंधित टोकन (वैकल्पिक)", en: "Related token (optional)" },
+
+  // Dealer enhancements
+  onlineTokensLbl: { hi: "ऑनलाइन टोकन", en: "Online Tokens" },
+  qrTokensLbl: { hi: "QR टोकन", en: "QR Tokens" },
+  pendingBeneficiaries: { hi: "प्रतीक्षारत लाभार्थी", en: "Pending Beneficiaries" },
+  estCompletion: { hi: "अनुमानित समापन", en: "Est. Completion" },
+  cancelToken: { hi: "टोकन रद्द करें", en: "Cancel Token" },
+  cancelTokenConfirm: { hi: "क्या आप यह टोकन रद्द करना चाहते हैं?", en: "Do you want to cancel this token?" },
+  tokenCancelled: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" },
+  cancelBeforeVisit: { hi: "निर्धारित समय से पहले रद्द किया जा सकता है।", en: "You can cancel before the scheduled time." },
+  entitlementCompare: { hi: "आधिकारिक हक़ बनाम वितरित मात्रा", en: "Official entitlement vs distributed" },
+  auditTimeline: { hi: "वितरण ऑडिट समयरेखा", en: "Distribution audit timeline" },
+  stockAlert: { hi: "दुकान स्टॉक चेतावनी", en: "Shop stock alert" },
+  demoSecurityNote: { hi: "यह डेमो है: असली OTP केवल लाभार्थी के फोन पर भेजा जाएगा।", en: "Demo only: a production OTP must be sent privately to the beneficiary." },
+};
+
+const LangCtx = createContext({ lang: "hi", t: (k) => k });
+const BeneficiaryCtx = createContext(null);
+function useT() {
+  const { lang, t } = useContext(LangCtx);
+  return { lang, t };
+}
+function useBeneficiary() {
+  return useContext(BeneficiaryCtx) || { profile: null };
+}
+
+/* =========================================================================
+   APP STATE — the unified queue engine
+   ========================================================================= */
+const initialQueue = [
+  { id: "A120", mode: "online", status: "serving", time: "9:10", name: "सुनीता देवी / Sunita Devi" },
+  { id: "A121", mode: "qr", status: "waiting", time: "9:30", name: "राजेश कुमार / Rajesh Kumar" },
+  { id: "A122", mode: "online", status: "waiting", time: "9:50", name: "मोहित वर्मा / Mohit Verma" },
+  { id: "A123", mode: "qr", status: "waiting", time: "10:10", name: "कविता बाई / Kavita Bai" },
+];
+
+const MOCK_WHATSAPP_CONTACTS = [
+  { id: "wa-01", name: "Seema Devi", number: "+91 98765 43210", token: "A124" },
+  { id: "wa-02", name: "Rajesh Kumar", number: "+91 98123 45670", token: "A121" },
+  { id: "wa-03", name: "Mohit Verma", number: "+91 98987 61234", token: "A122" },
+  { id: "wa-04", name: "Kavita Bai", number: "+91 97654 32109", token: "A123" },
+  { id: "wa-05", name: "Imran Khan", number: "+91 98220 14567", token: "A125" },
+  { id: "wa-06", name: "Sunita Devi", number: "+91 97531 86420", token: "A120" },
+  { id: "wa-07", name: "Aarav Sharma", number: "+91 99001 22334", token: "A126" },
+  { id: "wa-08", name: "Pooja Yadav", number: "+91 98450 77889", token: "A127" },
+  { id: "wa-09", name: "Ramesh Patel", number: "+91 97000 11223", token: "A128" },
+  { id: "wa-10", name: "Kamla Bai", number: "+91 98670 44556", token: "A129" },
+];
+
+/* Digital e-Ration Card demo data (Requirement: keep realistic, government-service-like) */
+const CARD_INFO = {
+  cardNo: "MP-45-1234-5678",
+  name: "सीमा देवी / Seema Devi",
+  categoryKey: "priorityHousehold",
+  ekyc: "ekycVerified",
+  familyCount: 5,
+};
+const CURRENT_BENEFICIARY_ID = CARD_INFO.cardNo;
+const ACTIVE_TOKEN_STATUSES = new Set(["waiting", "serving"]);
+
+function getActiveToken(state, beneficiaryId = CURRENT_BENEFICIARY_ID) {
+  return state.queue.find((token) =>
+    ACTIVE_TOKEN_STATUSES.has(token.status) &&
+    (token.ownerId === beneficiaryId || (!token.ownerId && beneficiaryId === CURRENT_BENEFICIARY_ID && token.id === state.userTokenId))
+  ) || null;
+}
+
+function nextAvailableTokenId(state, firstNumber) {
+  const used = new Set(state.queue.map((token) => token.id));
+  let number = firstNumber;
+  while (used.has(`A${number}`)) number += 1;
+  return `A${number}`;
+}
+
+const FAMILY_MEMBERS = [
+  { name: "सीमा देवी / Seema Devi", relKey: "self", age: 34, ekyc: "ekycVerified" },
+  { name: "रमेश कुमार / Ramesh Kumar", relKey: "spouse", age: 38, ekyc: "ekycVerified" },
+  { name: "आरव कुमार / Aarav Kumar", relKey: "son", age: 12, ekyc: "ekycVerified" },
+  { name: "अंशिका कुमारी / Anshika Kumari", relKey: "daughter", age: 8, ekyc: "ekycPending" },
+  { name: "कमला देवी / Kamla Devi", relKey: "mother", age: 61, ekyc: "ekycVerified" },
+];
+
+const RECEIPT_ITEMS_DEFAULT = [
+  { name: { hi: "गेहूं", en: "Wheat" }, entitled: "5 kg", qty: "5 kg" },
+  { name: { hi: "चावल", en: "Rice" }, entitled: "5 kg", qty: "5 kg" },
+  { name: { hi: "चीनी", en: "Sugar" }, entitled: "1 kg", qty: "1 kg" },
+];
+
+const initialState = {
+  queue: initialQueue,
+  userTokenId: null, // set once beneficiary books/scans
+  notifications: [
+    { icon: "bell", title: { hi: "मासिक हक़ उपलब्ध है", en: "Monthly Entitlement Available" }, body: { hi: "सितंबर 2026 के लिए आपका मासिक हक़ उपलब्ध है।", en: "Your monthly entitlement for September 2026 is available." } },
+  ],
+  history: [
+    {
+      month: { hi: "सितंबर 2026", en: "September 2026" }, token: "A121", status: "completed",
+      date: "15 September 2026", shop: "FPS-102 · Shanti Nagar", txnId: "TXN-20260915-121",
+      items: RECEIPT_ITEMS_DEFAULT,
+    },
+    {
+      month: { hi: "अगस्त 2026", en: "August 2026" }, token: "A089", status: "completed",
+      date: "14 August 2026", shop: "FPS-102 · Shanti Nagar", txnId: "TXN-20260814-089",
+      items: RECEIPT_ITEMS_DEFAULT,
+    },
+    {
+      month: { hi: "जुलाई 2026", en: "July 2026" }, token: "A052", status: "completed",
+      date: "12 July 2026", shop: "FPS-102 · Shanti Nagar", txnId: "TXN-20260712-052",
+      items: RECEIPT_ITEMS_DEFAULT,
+    },
+  ],
+  complaints: [],
+  whatsappMessages: [
+    { id: "wa-demo-1", contactId: "wa-02", contact: "Rajesh Kumar", number: "+91 98123 45670", message: "Your token A121 is now in queue.", status: "delivered", sentAt: "10:14 AM", persistence: "demo" },
+    { id: "wa-demo-2", contactId: "wa-04", contact: "Kavita Bai", number: "+91 97654 32109", message: "Please carry your ration card.", status: "queued", sentAt: "09:58 AM", persistence: "demo" },
+  ],
+  completedCount: 34,
+  totalToday: 42,
+  avgWaitMin: 18,
+  pendingDistribution: null,
+  auditLog: [
+    { event: "Token created", detail: "Demo queue initialized", time: "09:00 AM" },
+  ],
+};
+
+const STORAGE_KEY = "ration-setu-demo-state-v1";
+const THEME_STORAGE_KEY = "ration-setu-theme-v1";
+
+function getInitialTheme() {
+  if (typeof window === "undefined") return "light";
+  const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved === "dark" || saved === "light") return saved;
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function loadInitialState() {
+  if (typeof window === "undefined") return initialState;
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (!saved) return initialState;
+    const parsed = JSON.parse(saved);
+    const userTokenId = parsed.userTokenId || null;
+    return {
+      ...initialState,
+      ...parsed,
+      queue: (Array.isArray(parsed.queue) ? parsed.queue : initialState.queue).map((token) =>
+        token.id === userTokenId && !token.ownerId ? { ...token, ownerId: CURRENT_BENEFICIARY_ID } : token
+      ),
+      userTokenId,
+      notifications: Array.isArray(parsed.notifications) ? parsed.notifications : initialState.notifications,
+      history: Array.isArray(parsed.history) ? parsed.history : initialState.history,
+      complaints: Array.isArray(parsed.complaints) ? parsed.complaints : initialState.complaints,
+      whatsappMessages: Array.isArray(parsed.whatsappMessages) ? parsed.whatsappMessages : initialState.whatsappMessages,
+      auditLog: Array.isArray(parsed.auditLog) ? parsed.auditLog : initialState.auditLog,
+    };
+  } catch {
+    return initialState;
+  }
+}
+
+let complaintSeq = 1042;
+
+let slotClock = 630; // minutes after 9:00 => next slot at 10:30
+
+function nextSlotLabel() {
+  slotClock += 20;
+  const h = Math.floor(slotClock / 60) + 9;
+  const m = slotClock % 60;
+  const hour12 = h > 12 ? h - 12 : h;
+  return `${hour12}:${m.toString().padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+function auditEntry(event, detail) {
+  return { event, detail, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "SEND_WHATSAPP": {
+      const message = { ...action.message, status: action.message.status || "sent" };
+      return { ...state, whatsappMessages: [message, ...(state.whatsappMessages || [])].slice(0, 50) };
+    }
+    case "BOOK_ONLINE": {
+      const ownerId = action.beneficiaryId || CURRENT_BENEFICIARY_ID;
+      const activeToken = getActiveToken(state, ownerId);
+      if (activeToken) {
+        return {
+          ...state,
+          tokenGenerationError: { tokenId: activeToken.id, ownerId, path: "online" },
+        };
+      }
+      const time = "10:30 AM";
+      const tokenId = nextAvailableTokenId(state, 124);
+      const newQueue = [...state.queue, { id: tokenId, ownerId, mode: "online", status: "waiting", time, name: `${action.beneficiaryName || "Beneficiary"} (You)` }];
+      return {
+        ...state,
+        queue: newQueue,
+        userTokenId: ownerId === CURRENT_BENEFICIARY_ID ? tokenId : state.userTokenId,
+        tokenGenerationError: null,
+        auditLog: [auditEntry("Token created", "A124 online booking"), ...state.auditLog],
+        notifications: [
+          { icon: "check", title: { hi: "ऑनलाइन स्लॉट पक्का हुआ", en: "Online Slot Confirmed" }, body: { hi: `आपका ऑनलाइन स्लॉट पक्का हो गया है। टोकन ${tokenId}, 10:30 AM के लिए बुक हुआ।`, en: `Your online slot is confirmed. Token ${tokenId} booked for 10:30 AM.` } },
+          ...state.notifications,
+        ],
+      };
+    }
+    case "GENERATE_QR_TOKEN": {
+      const ownerId = action.beneficiaryId || CURRENT_BENEFICIARY_ID;
+      const activeToken = getActiveToken(state, ownerId);
+      if (activeToken) {
+        return {
+          ...state,
+          tokenGenerationError: { tokenId: activeToken.id, ownerId, path: "qr" },
+        };
+      }
+      const time = nextSlotLabel();
+      const tokenId = nextAvailableTokenId(state, 125);
+      const newQueue = [...state.queue, { id: tokenId, ownerId, mode: "qr", status: "waiting", time, name: `${action.beneficiaryName || "Beneficiary"} (Walk-in)` }];
+      return { ...state, queue: newQueue, userTokenId: ownerId === CURRENT_BENEFICIARY_ID ? tokenId : state.userTokenId, tokenGenerationError: null, auditLog: [auditEntry("Token created", `${tokenId} offline QR`), ...state.auditLog] };
+    }
+    case "CANCEL_TOKEN": {
+      const ownerId = action.beneficiaryId || CURRENT_BENEFICIARY_ID;
+      const token = getActiveToken(state, ownerId);
+      if (!token || token.status !== "waiting") return state;
+      return {
+        ...state,
+        queue: state.queue.filter((q) => q.id !== token.id),
+        userTokenId: state.userTokenId === token.id ? null : state.userTokenId,
+        tokenGenerationError: null,
+        auditLog: [auditEntry("Token cancelled", token.id), ...state.auditLog],
+        notifications: [
+          { icon: "check", title: { hi: "टोकन रद्द हो गया", en: "Token Cancelled" }, body: { hi: `टोकन ${token.id} रद्द कर दिया गया है।`, en: `Token ${token.id} has been cancelled.` } },
+          ...state.notifications,
+        ],
+      };
+    }
+    case "GENERATE_DISTRIBUTION_OTP": {
+      const token = state.queue.find((q) => q.id === action.tokenId);
+      if (!token || token.status !== "serving") return state;
+      return { ...state, pendingDistribution: { tokenId: token.id, otp: token.id } };
+    }
+    case "COMPLETE_DISTRIBUTION": {
+      const pending = state.pendingDistribution;
+      if (!pending || pending.tokenId !== action.tokenId || String(pending.otp).toUpperCase() !== String(action.otp).trim().toUpperCase()) return state;
+      const completedQueue = state.queue.map((q) => q.id === pending.tokenId ? { ...q, status: "completed" } : q);
+      const nextWaiting = completedQueue.findIndex((q) => q.status === "waiting");
+      const queue = nextWaiting === -1
+        ? completedQueue
+        : completedQueue.map((q, index) => index === nextWaiting ? { ...q, status: "serving" } : q);
+      const completedToken = state.queue.find((q) => q.id === pending.tokenId);
+      const isUserToken = Boolean(completedToken?.ownerId || pending.tokenId === state.userTokenId);
+      return {
+        ...state,
+        queue,
+        pendingDistribution: null,
+        completedCount: state.completedCount + 1,
+        history: isUserToken && completedToken ? [{
+          month: { hi: "सितंबर 2026", en: "September 2026" }, token: completedToken.id, status: "completed",
+          date: "15 September 2026", shop: "FPS-102 · Shanti Nagar", txnId: `TXN-20260915-${completedToken.id}`,
+          items: action.items || RECEIPT_ITEMS_DEFAULT,
+          audit: [auditEntry("Distribution verified", `Token ${pending.tokenId}`), ...state.auditLog],
+        }, ...state.history] : state.history,
+        auditLog: [
+          auditEntry("OTP verified", `Token ${pending.tokenId}; distribution recorded`),
+          ...state.auditLog,
+        ],
+        notifications: isUserToken ? [
+          { icon: "check", title: { hi: "राशन सफलतापूर्वक वितरित हुआ", en: "Ration Distributed Successfully" }, body: { hi: `टोकन ${pending.tokenId} का वितरण OTP से सत्यापित हुआ।`, en: `Distribution for token ${pending.tokenId} was verified by OTP.` } },
+          ...state.notifications,
+        ] : state.notifications,
+      };
+    }
+    case "CALL_NEXT": {
+      const q = [...state.queue];
+      const servingIdx = q.findIndex((t) => t.status === "serving");
+      if (servingIdx !== -1) return state;
+      const nextIdx = q.findIndex((t) => t.status === "waiting");
+      if (nextIdx !== -1) {
+        q[nextIdx] = { ...q[nextIdx], status: "serving" };
+      }
+      const called = nextIdx === -1 ? null : q[nextIdx];
+      return {
+        ...state,
+        queue: q,
+        auditLog: called ? [auditEntry("Token called", called.id), ...state.auditLog] : state.auditLog,
+      };
+    }
+    case "MARK_NOSHOW": {
+      const q = [...state.queue];
+      const servingIdx = q.findIndex((t) => t.status === "serving");
+      if (servingIdx === -1) return state;
+      q[servingIdx] = { ...q[servingIdx], status: "noshow" };
+      const nextIdx = q.findIndex((t) => t.status === "waiting");
+      if (nextIdx !== -1) q[nextIdx] = { ...q[nextIdx], status: "serving" };
+      return { ...state, queue: q };
+    }
+    case "FILE_COMPLAINT": {
+      complaintSeq += 1;
+      const complaint = {
+        id: `RS-CMP-${complaintSeq}`,
+        typeKey: action.typeKey,
+        desc: action.desc || "",
+        tokenRef: action.tokenRef || "",
+        status: "submitted",
+        date: "12 September 2026",
+      };
+      return { ...state, complaints: [complaint, ...state.complaints] };
+    }
+    case "ADVANCE_COMPLAINT": {
+      const order = ["submitted", "review", "resolved"];
+      const complaints = state.complaints.map((c) => {
+        if (c.id !== action.id) return c;
+        const idx = order.indexOf(c.status);
+        const next = order[Math.min(idx + 1, order.length - 1)];
+        return { ...c, status: next };
+      });
+      return { ...state, complaints };
+    }
+    default:
+      return state;
+  }
+}
+
+/* =========================================================================
+   SMALL UI PRIMITIVES
+   ========================================================================= */
+function Btn({ children, onClick, variant = "primary", icon: Icon, full, disabled, size = "md" }) {
+  const base = {
+    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+    fontFamily: "Inter, sans-serif", fontWeight: 600,
+    borderRadius: 14, cursor: disabled ? "not-allowed" : "pointer",
+    border: "none", transition: "transform .12s ease, opacity .12s ease",
+    opacity: disabled ? 0.5 : 1, width: full ? "100%" : "auto",
+  };
+  const sizes = { md: { padding: "13px 20px", fontSize: 15 }, sm: { padding: "9px 14px", fontSize: 13.5 } };
+  const variants = {
+    primary: { background: C.navy, color: C.white },
+    green: { background: C.green, color: C.white },
+    gold: { background: C.gold, color: C.navyDeep },
+    outline: { background: "transparent", color: C.navy, border: `1.5px solid ${C.navy}` },
+    ghost: { background: C.cream, color: C.navy },
+    danger: { background: "transparent", color: C.red, border: `1.5px solid ${C.red}` },
+  };
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.97)")}
+      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      style={{ ...base, ...sizes[size], ...variants[variant] }}
+    >
+      {Icon && <Icon size={size === "sm" ? 15 : 18} />}
+      {children}
+    </button>
+  );
+}
+
+function Card({ children, style, onClick }) {
+  return (
+    <div
+      className="rs-card"
+      onClick={onClick}
+      style={{
+        background: C.white, borderRadius: 18, padding: 16,
+        border: `1px solid ${C.greyLine}`, boxShadow: "0 1px 3px rgba(15,42,74,0.05)",
+        cursor: onClick ? "pointer" : "default", ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function StatusPill({ status }) {
+  const { t } = useT();
+  const map = {
+    waiting: { bg: C.goldBg, fg: C.warningText, label: t(dict.waiting) },
+    serving: { bg: C.greenBg, fg: C.green, label: t(dict.serving) },
+    completed: { bg: C.infoBg, fg: C.grey, label: t(dict.completed) },
+    noshow: { bg: C.redBg, fg: C.red, label: t(dict.noshow) },
+  };
+  const s = map[status] || map.waiting;
+  return (
+    <span style={{ background: s.bg, color: s.fg, fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap" }}>
+      {s.label}
+    </span>
+  );
+}
+
+function StockPill({ level }) {
+  const { t } = useT();
+  const map = {
+    available: { bg: C.greenBg, fg: C.green, label: t(dict.available) },
+    limited: { bg: C.goldBg, fg: C.warningText, label: t(dict.limited) },
+    out: { bg: C.redBg, fg: C.red, label: t(dict.outOfStock) },
+  };
+  const s = map[level] || map.available;
+  return (
+    <span style={{ background: s.bg, color: s.fg, fontSize: 12, fontWeight: 700, padding: "4px 10px", borderRadius: 999, whiteSpace: "nowrap" }}>
+      {s.label}
+    </span>
+  );
+}
+
+function EkycPill({ statusKey }) {
+  const { t } = useT();
+  const verified = statusKey === "ekycVerified";
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11.5, fontWeight: 700,
+      padding: "3px 9px", borderRadius: 999,
+      background: verified ? C.greenBg : C.goldBg, color: verified ? C.green : C.warningText,
+    }}>
+      <CheckCircle2 size={11} />
+      {t(dict[statusKey])}
+    </span>
+  );
+}
+
+function ModePill({ mode }) {
+  const { t } = useT();
+  const isOnline = mode === "online";
+  return (
+    <span style={{
+      fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
+      background: isOnline ? C.infoBg : C.goldBg, color: isOnline ? C.infoText : C.warningText,
+      display: "inline-flex", alignItems: "center", gap: 4,
+    }}>
+      {isOnline ? <Phone size={10} /> : <QrCode size={10} />}
+      {isOnline ? t(dict.onlineTokenLbl) : t(dict.qrTokenLbl)}
+    </span>
+  );
+}
+
+function ScreenHeader({ title, onBack }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "18px 20px 6px" }}>
+      {onBack && (
+        <button onClick={onBack} style={{ background: C.cream, border: "none", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <ChevronLeft size={18} color={C.navy} />
+        </button>
+      )}
+      <h2 style={{ fontFamily: "Poppins, sans-serif", fontSize: 19, fontWeight: 700, color: C.navy, margin: 0 }}>{title}</h2>
+    </div>
+  );
+}
+
+function Logo({ size = 34 }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+      <img
+        src={LOGO_SRC}
+        alt="Ration Setu"
+        style={{ width: size, height: size, objectFit: "contain", flexShrink: 0, display: "block" }}
+      />
+      <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: size * 0.5, color: C.navy, letterSpacing: -0.3 }}>
+        Ration<span style={{ color: C.green }}>Setu</span>
+      </span>
+    </div>
+  );
+}
+
+/* Unified queue visual — the single "bold" design moment */
+function UnifiedQueueDiagram() {
+  const { t } = useT();
+  return (
+    <div style={{ background: C.navy, borderRadius: 20, padding: "22px 18px", position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: "rgba(232,169,60,0.12)" }} />
+      <p style={{ color: C.gold, fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 15.5, margin: "0 0 14px", position: "relative" }}>
+        {t(dict.unifiedTitle)}
+      </p>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "8px 10px", marginBottom: 8 }}>
+            <Phone size={14} color="#8FB8E8" />
+            <span style={{ color: "#CFE0F5", fontSize: 12.5, fontWeight: 600 }}>{t(dict.onlineTokenLbl)}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "8px 10px" }}>
+            <QrCode size={14} color="#F0C77E" />
+            <span style={{ color: "#F3DBAE", fontSize: 12.5, fontWeight: 600 }}>{t(dict.qrTokenLbl)}</span>
+          </div>
+        </div>
+        <ArrowRight size={20} color="rgba(255,255,255,0.4)" />
+        <div style={{ background: C.gold, color: C.navyDeep, borderRadius: 12, padding: "16px 14px", fontWeight: 800, fontFamily: "Poppins, sans-serif", fontSize: 13, textAlign: "center", lineHeight: 1.25, minWidth: 90 }}>
+          {t(dict.unifiedQueueLbl)}
+        </div>
+      </div>
+      <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, margin: "14px 0 0", position: "relative" }}>{t(dict.unifiedSub)}</p>
+    </div>
+  );
+}
+
+/* Login page background (Requirement: used ONLY on the Login screen, unmodified) */
+import LOGIN_BG from "../assets/login-bg.png";
+
+/* =========================================================================
+   RESPONSIVE APP SHELL (replaces the old fixed-size phone-bezel mockup)
+   Mobile: fills the viewport naturally, like a real mobile web app.
+   Tablet/Desktop: becomes a centered, softly-rounded content column —
+   NOT a phone mockup — so the site reads as a proper responsive web app.
+   ========================================================================= */
+function SideNav({ active, onNav, onLogout }) {
+  const { t } = useT();
+  const items = [
+    { key: "home", label: t(dict.home), icon: Home },
+    { key: "queue", label: t(dict.queue), icon: Users },
+    { key: "notif", label: t(dict.notif), icon: Bell },
+    { key: "profile", label: t(dict.profile), icon: User },
+  ];
+  return (
+    <aside className="rs-sidebar">
+      <div className="rs-sidebar-brand"><Logo size={36} /><span className="rs-sidebar-kicker">STATE PDS SERVICES</span></div>
+      <nav className="rs-sidebar-nav" aria-label="Primary navigation">
+        <p className="rs-sidebar-label">Citizen workspace</p>
+        {items.map((item) => {
+          const Icon = item.icon;
+          return <button key={item.key} className={`rs-sidebar-item ${active === item.key ? "is-active" : ""}`} onClick={() => onNav(item.key)}>
+            <Icon size={18} /><span>{item.label}</span>
+            {item.key === "notif" && <span className="rs-sidebar-dot" />}
+          </button>;
+        })}
+      </nav>
+      <div className="rs-sidebar-bottom">
+        <div className="rs-sidebar-help"><ShieldCheck size={17} /><div><b>Secure access</b><span>Verified beneficiary account</span></div></div>
+        <button className="rs-sidebar-logout" onClick={onLogout}><LogOut size={16} /> {t(dict.logout)}</button>
+      </div>
+    </aside>
+  );
+}
+
+function AppShell({ children, footer, sidebar, active, onNav, state }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [readIds, setReadIds] = useState([]);
+  const notificationItems = [
+    ...(state?.notifications || []).map((item, index) => ({ ...item, id: `notice-${index}`, label: item.title?.en || "Notification", detail: item.body?.en || "" })),
+    ...(state?.whatsappMessages || []).map((item) => ({ id: item.id, label: `WhatsApp demo · ${item.contact}`, detail: item.message, status: item.status, sentAt: item.sentAt })),
+  ];
+  const unreadCount = notificationItems.filter((item) => !readIds.includes(item.id)).length;
+  useEffect(() => {
+    if (!notificationsOpen) return undefined;
+    const closeOnEscape = (event) => { if (event.key === "Escape") setNotificationsOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [notificationsOpen]);
+  return (
+    <div className={`rs-shell ${sidebar ? "has-sidebar" : ""}`}>
+      {sidebar}
+      <div className="rs-shell-main">
+        {sidebar && (
+          <header className="rs-portal-header">
+            <div className="rs-portal-header-title">
+              <span className="rs-portal-breadcrumb">PUBLIC DISTRIBUTION SYSTEM</span>
+              <strong>{t(dict.home)} · Beneficiary services</strong>
+            </div>
+            <div className="rs-portal-header-actions">
+              <span className="rs-service-status"><span className="rs-status-dot" /> Services operational</span>
+              <div className="rs-notification-control">
+                <button className="rs-header-icon" type="button" aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ""}`} aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((open) => !open)}>
+                  <Bell size={17} />{unreadCount > 0 && <span className="rs-notification-count">{unreadCount > 9 ? "9+" : unreadCount}</span>}
+                </button>
+                {notificationsOpen && (
+                  <>
+                    <button className="rs-notification-backdrop" aria-label="Close notifications" type="button" onClick={() => setNotificationsOpen(false)} />
+                    <section className="rs-notification-popover" aria-label="Notification panel">
+                      <div className="rs-notification-popover-head"><b>Notifications</b><span>{unreadCount} unread</span></div>
+                      <div className="rs-notification-popover-actions">
+                        <button type="button" onClick={() => setReadIds(notificationItems.map((item) => item.id))}>Mark all as read</button>
+                        <button type="button" onClick={() => setNotificationsOpen(false)}>Close</button>
+                      </div>
+                      <div className="rs-notification-list">
+                        {notificationItems.length === 0 && <p className="rs-notification-empty">No notifications</p>}
+                        {notificationItems.slice(0, 8).map((item) => (
+                          <button type="button" key={item.id} className={`rs-notification-item ${readIds.includes(item.id) ? "is-read" : ""}`} onClick={() => setReadIds((ids) => ids.includes(item.id) ? ids : [...ids, item.id])}>
+                            <span className="rs-notification-item-icon"><Bell size={14} /></span>
+                            <span><b>{item.label}</b><small>{item.detail}</small><em>{item.sentAt || item.status || "Current update"}</em></span>
+                          </button>
+                        ))}
+                      </div>
+                      <button type="button" className="rs-notification-view-all" onClick={() => { setNotificationsOpen(false); onNav?.("notif"); }}>View all notifications</button>
+                    </section>
+                  </>
+                )}
+              </div>
+              <div className="rs-header-user"><span className="rs-avatar">{(profile?.name?.en || "Beneficiary").charAt(0)}</span><span>{profile?.name?.en || "Beneficiary"}</span></div>
+            </div>
+          </header>
+        )}
+        {sidebar && (
+          <nav className="rs-service-nav" aria-label="Service navigation">
+            <span className="rs-service-nav-label">Citizen services</span>
+            {[["home", "Overview"], ["entitlement", "Ration card"], ["profile", "Distribution history"], ["complaints", "Support"]].map(([key, label]) => (
+              <button key={key} className={active === key ? "is-current" : ""} type="button" onClick={() => onNav?.(key)}>{label}</button>
+            ))}
+          </nav>
+        )}
+        <div className="rs-shell-scroll">{children}</div>
+        {footer && <div className="rs-shell-footer">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
+
+function BottomNav({ active, onNav }) {
+  const { t } = useT();
+  const items = [
+    { key: "home", label: t(dict.home), icon: Home },
+    { key: "queue", label: t(dict.queue), icon: Users },
+    { key: "notif", label: t(dict.notif), icon: Bell },
+    { key: "profile", label: t(dict.profile), icon: User },
+  ];
+  return (
+    <div style={{ display: "flex", background: C.white, borderTop: `1px solid ${C.greyLine}`, padding: "8px 4px 12px" }}>
+      {items.map((it) => {
+        const isActive = active === it.key;
+        return (
+          <button key={it.key} onClick={() => onNav(it.key)} style={{
+            flex: 1, background: "none", border: "none", display: "flex", flexDirection: "column",
+            alignItems: "center", gap: 3, cursor: "pointer", padding: "4px 0",
+          }}>
+            <it.icon size={19} color={isActive ? C.navy : C.grey} strokeWidth={isActive ? 2.4 : 2} />
+            <span style={{ fontSize: 10.5, fontWeight: isActive ? 700 : 500, color: isActive ? C.navy : C.grey }}>{it.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* =========================================================================
+   BENEFICIARY SCREENS
+   ========================================================================= */
+function SplashScreen({ onStart }) {
+  const { t } = useT();
+  return (
+    <div className="rs-public-home">
+      <header className="rs-public-header">
+        <div className="rs-public-brand"><img src={LOGO_SRC} alt="Ration Setu" /><div><strong>Ration<span>Setu</span></strong><small>PUBLIC DISTRIBUTION SYSTEM</small></div></div>
+        <nav className="rs-public-nav"><a href="#services">Services</a><a href="#notices">Notices</a><a href="#help">Help & support</a></nav>
+        <div className="rs-public-actions"><button onClick={() => onStart("hi")}>हिंदी</button><button onClick={() => onStart("en")}>English</button><button className="rs-public-login" onClick={() => onStart()}><User size={15} /> Citizen login</button></div>
+      </header>
+      <main>
+        <section className="rs-public-hero">
+          <div className="rs-public-hero-copy"><span className="rs-public-kicker">GOVERNMENT SERVICE PORTAL · PDS</span><h1>Reliable access to your<br /><em>ration services.</em></h1><p>Manage your ration card, check entitlement, join the FPS queue, and track distribution from one secure portal.</p><div className="rs-public-hero-actions"><Btn icon={ArrowRight} onClick={() => onStart()}>{t(dict.getStarted)}</Btn><button className="rs-text-action" onClick={() => onStart("en")}>Explore services <ArrowRight size={15} /></button></div></div>
+          <div className="rs-public-hero-panel"><div className="rs-public-panel-top"><span>Service status</span><span className="rs-live"><i /> All systems operational</span></div><div className="rs-public-stat"><strong>FPS-102</strong><span>Assigned fair price shop</span></div><div className="rs-public-stat"><strong>18 min</strong><span>Current estimated wait</span></div><div className="rs-public-panel-footer"><ShieldCheck size={16} /> Secure, transparent and citizen-first</div></div>
+        </section>
+        <section className="rs-public-section" id="services"><div className="rs-public-section-heading"><div><span className="rs-public-kicker">CITIZEN SERVICES</span><h2>Everything you need, in one place</h2></div><span className="rs-section-note">Available 24×7</span></div><div className="rs-public-service-grid"><button onClick={() => onStart()}><IdCard /><span><b>Ration card services</b><small>View card, family and e-KYC details</small></span><ArrowRight /></button><button onClick={() => onStart()}><Ticket /><span><b>Book a distribution slot</b><small>Join the fair, unified queue online</small></span><ArrowRight /></button><button onClick={() => onStart()}><QrCode /><span><b>Scan FPS QR token</b><small>Join the queue at your assigned shop</small></span><ArrowRight /></button><button onClick={() => onStart("en")}><History /><span><b>Distribution history</b><small>Receipts, quantities and transaction status</small></span><ArrowRight /></button></div></section>
+        <section className="rs-public-lower" id="notices"><div className="rs-public-notice"><div className="rs-public-section-heading"><h2>Important notice</h2><span className="rs-notice-badge">For citizens</span></div><p>September 2026 monthly entitlement is now available. Check your assigned FPS stock before visiting the shop.</p><button onClick={() => onStart()}>View your entitlement <ArrowRight size={15} /></button></div><div className="rs-public-help" id="help"><div className="rs-help-icon"><Phone size={18} /></div><div><span className="rs-public-kicker">NEED ASSISTANCE?</span><h3>We are here to help</h3><p>Use the support centre to report a discrepancy or track a complaint.</p></div><ArrowRight size={18} /></div></section>
+      </main>
+      <footer className="rs-public-footer"><span>{t(dict.studentProto)} · {t(dict.disclaimerShort)}</span><span>RationSetu · Public Distribution System</span></footer>
+    </div>
+  );
+}
+
+function LoginScreen({ onDone }) {
+  const { t } = useT();
+  const [step, setStep] = useState(0); // 0 mobile, 1 otp, 2 card, done
+  const [mobile, setMobile] = useState("");
+  const [otp, setOtp] = useState("");
+  const [card, setCard] = useState("");
+  const beneficiaries = listDemoBeneficiaries();
+  const [matches, setMatches] = useState([]);
+  const [lookupError, setLookupError] = useState("");
+  const [lookingUp, setLookingUp] = useState(false);
+  const [showDemoHelp, setShowDemoHelp] = useState(false);
+  const demoProfiles = beneficiaries.slice(0, 3);
+
+  return (
+    <div className="rs-auth-screen">
+      {/* Background layer — blurred, ONLY on this screen. Not applied to any sibling/child content. */}
+      <div className="rs-auth-card">
+        <Logo size={38} />
+        <div className="rs-auth-heading"><span>Citizen services</span><h2>{t(dict.welcome)}</h2><p>Sign in securely to manage your ration services.</p></div>
+        <button type="button" className="rs-demo-help-toggle" onClick={() => setShowDemoHelp((open) => !open)} aria-expanded={showDemoHelp}>View 3 demo beneficiary profiles</button>
+        {showDemoHelp && <div className="rs-demo-help-panel" role="region" aria-label="Demo beneficiary credentials">
+          <b>DEMO ONLY · no real authentication</b>
+          <small>Use any 6-digit OTP after entering one of these mobile numbers, then use the matching card or BEN ID.</small>
+          {demoProfiles.map((item) => <button type="button" key={item.id} onClick={() => { setMobile(item.mobile); setCard(item.cardNo); setStep(1); }}>
+            <strong>{item.name.en}</strong><span>{item.id} · +91 {item.mobile} · {item.cardNo}</span>
+          </button>)}
+        </div>}
+
+        {step === 0 && (
+          <div>
+            <label style={{ fontSize: 12.5, fontWeight: 600, color: C.grey }}>{t(dict.mobileNumber)}</label>
+            <div className="rs-auth-input-row">
+              <span style={{ color: C.grey, marginRight: 8, fontWeight: 600 }}>+91</span>
+              <input value={mobile} onChange={(e) => setMobile(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="98XXXXXXXX"
+                className="rs-auth-input" />
+            </div>
+            <Btn full icon={Phone} disabled={mobile.length < 10} onClick={() => setStep(1)}>{t(dict.sendOtp)}</Btn>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div>
+            <label style={{ fontSize: 12.5, fontWeight: 600, color: C.grey }}>{t(dict.enterOtp)}</label>
+            <div className="rs-auth-field">
+              <input value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="••••••"
+                className="rs-auth-input rs-auth-code" />
+            </div>
+            <p style={{ fontSize: 11.5, color: C.grey, margin: "0 0 20px" }}>{t(dict.demoOtpHint)}</p>
+            <Btn full icon={KeyRound} disabled={otp.length < 6} onClick={() => setStep(2)}>{t(dict.verify)}</Btn>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            <label style={{ fontSize: 12.5, fontWeight: 600, color: C.grey }}>{t(dict.rationCardNumber)}</label>
+            <div className="rs-auth-field">
+              <input value={card} onChange={(e) => setCard(e.target.value)} placeholder="MP-45-1234-5678"
+                className="rs-auth-input" />
+            </div>
+            <Btn full icon={IdCard} disabled={card.length < 4 || lookingUp} onClick={async () => {
+              setLookingUp(true);
+              setLookupError("");
+              try {
+                const found = await fetchBeneficiary(card);
+                if (found) { setMatches([]); onDone(found); }
+                else setMatches(beneficiaries.filter((item) => item.id.includes(card.toUpperCase()) || item.cardNo.includes(card)));
+              } catch (error) {
+                setLookupError("Live beneficiary service is unavailable. Try a seeded BEN-001 to BEN-012 record.");
+              } finally { setLookingUp(false); }
+            }}>{t(dict.continue)}</Btn>
+            {matches.length > 0 && <div className="rs-beneficiary-picker" aria-label="Demo beneficiary records">
+              <p>Select a demo beneficiary record</p>
+              {matches.map((item) => <button type="button" key={item.id} onClick={() => onDone(item)}><b>{item.id}</b><span>{item.name.en} · {item.cardNo}</span></button>)}
+            </div>}
+            <p style={{ fontSize: 11, color: C.grey, margin: "12px 0 0" }}>Demo records: 3 featured profiles shown above; the local/API seed remains available for BEN-001 onward.</p>
+            {lookupError && <p role="alert" style={{ fontSize: 11.5, color: C.red, margin: "8px 0 0" }}>{lookupError}</p>}
+          </div>
+        )}
+
+        <div className="rs-auth-steps">
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ width: 7, height: 7, borderRadius: 4, background: i <= step ? C.green : C.greyLine }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DealerLoginScreen({ onLogin }) {
+  const { t } = useT();
+  const [dealerId, setDealerId] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [showDemoHelp, setShowDemoHelp] = useState(false);
+  const demoAccounts = [
+    { id: "FPS-102", pin: "1234", name: "Anita Sharma", shop: "Shanti Nagar FPS" },
+    { id: "FPS-205", pin: "2468", name: "Vikram Patel", shop: "Nehru Market FPS" },
+  ];
+
+  const submit = () => {
+    if (demoAccounts.some((account) => account.id === dealerId.trim().toUpperCase() && account.pin === pin)) {
+      setError("");
+      onLogin();
+      return;
+    }
+    setError(t(dict.invalidDealerLogin));
+  };
+
+  return (
+    <div className="rs-auth-screen">
+      <Card style={{ padding: 24, maxWidth: 440, width: "100%" }}>
+        <div className="rs-auth-heading rs-auth-dealer-heading">
+          <Logo size={52} />
+          <h2 style={{ fontFamily: "Poppins, sans-serif", color: C.navy, fontSize: 22, margin: "14px 0 5px" }}>{t(dict.dealerLogin)}</h2>
+          <p style={{ color: C.grey, fontSize: 12.5, margin: 0 }}>{t(dict.officialPortal)}</p>
+        </div>
+        <button type="button" className="rs-demo-help-toggle" onClick={() => setShowDemoHelp((open) => !open)} aria-expanded={showDemoHelp}>View 2 demo dealer accounts</button>
+        {showDemoHelp && <div className="rs-demo-help-panel" role="region" aria-label="Demo dealer credentials">
+          <b>DEMO ONLY · no real authentication</b>
+          {demoAccounts.map((account) => <button type="button" key={account.id} onClick={() => { setDealerId(account.id); setPin(account.pin); }}>
+            <strong>{account.name} · {account.shop}</strong><span>ID {account.id} · PIN {account.pin}</span>
+          </button>)}
+        </div>}
+        <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, marginBottom: 7 }}>{t(dict.dealerId)}</label>
+        <input
+          value={dealerId}
+          onChange={(e) => setDealerId(e.target.value)}
+          placeholder="FPS-102"
+          autoComplete="username"
+          className="rs-auth-input"
+        />
+        <label style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, marginBottom: 7 }}>{t(dict.dealerPin)}</label>
+        <input
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          placeholder="••••"
+          type="password"
+          inputMode="numeric"
+          autoComplete="current-password"
+          className="rs-auth-input"
+        />
+        <p style={{ color: C.grey, fontSize: 11.5, margin: "0 0 16px" }}>Demo only: use either account above. No real dealer authentication is performed.</p>
+        {error && <p role="alert" style={{ color: C.red, fontSize: 12.5, margin: "0 0 12px" }}>{error}</p>}
+        <Btn full icon={ShieldCheck} disabled={!dealerId.trim() || pin.length !== 4} onClick={submit}>{t(dict.dealerSignIn)}</Btn>
+      </Card>
+    </div>
+  );
+}
+
+function AdminLoginScreen({ onLogin }) {
+  const [adminId, setAdminId] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [showDemoHelp, setShowDemoHelp] = useState(false);
+  const demoAccounts = [
+    { id: "ADMIN-001", password: "Admin@123", name: "Meera Joshi", role: "District operations" },
+    { id: "ADMIN-002", password: "Admin@456", name: "Arvind Singh", role: "Supply oversight" },
+  ];
+
+  const submit = (event) => {
+    event.preventDefault();
+    if (demoAccounts.some((account) => account.id === adminId.trim().toUpperCase() && account.password === password)) {
+      setError("");
+      onLogin();
+      return;
+    }
+    setError("Invalid demo administrator credentials. Please check the ID and password.");
+  };
+
+  return (
+    <div className="rs-auth-screen rs-admin-auth-screen">
+      <Card style={{ padding: 24, maxWidth: 440, width: "100%" }}>
+        <div className="rs-auth-heading rs-auth-dealer-heading">
+          <Logo size={52} />
+          <h2 style={{ fontFamily: "Poppins, sans-serif", color: C.navy, fontSize: 22, margin: "14px 0 5px" }}>Administrator sign in</h2>
+          <p style={{ color: C.grey, fontSize: 12.5, margin: 0 }}>Secure access to portal analytics and operations</p>
+        </div>
+        <button type="button" className="rs-demo-help-toggle" onClick={() => setShowDemoHelp((open) => !open)} aria-expanded={showDemoHelp}>View 2 demo administrator accounts</button>
+        {showDemoHelp && <div className="rs-demo-help-panel" role="region" aria-label="Demo administrator credentials">
+          <b>DEMO ONLY · no real authentication</b>
+          {demoAccounts.map((account) => <button type="button" key={account.id} onClick={() => { setAdminId(account.id); setPassword(account.password); }}>
+            <strong>{account.name} · {account.role}</strong><span>ID {account.id} · Password {account.password}</span>
+          </button>)}
+        </div>}
+        <form onSubmit={submit}>
+          <label htmlFor="admin-id" style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, marginBottom: 7 }}>Admin ID</label>
+          <input
+            id="admin-id"
+            value={adminId}
+            onChange={(event) => { setAdminId(event.target.value); setError(""); }}
+            placeholder="ADMIN-001"
+            autoComplete="username"
+            className="rs-auth-input"
+            aria-invalid={Boolean(error)}
+          />
+          <label htmlFor="admin-password" style={{ display: "block", fontSize: 12.5, fontWeight: 700, color: C.grey, margin: "14px 0 7px" }}>Password</label>
+          <div className="rs-auth-input-row">
+            <input
+              id="admin-password"
+              value={password}
+              onChange={(event) => { setPassword(event.target.value); setError(""); }}
+              placeholder="Enter password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              className="rs-auth-input"
+              aria-invalid={Boolean(error)}
+            />
+            <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} style={{ border: 0, background: "transparent", color: C.indigo, cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+          <div className="rs-demo-badge" style={{ display: "block", marginBottom: 14 }}>DEMO ONLY · use the credentials in the help panel</div>
+          {error && <p role="alert" style={{ color: C.red, fontSize: 12.5, margin: "0 0 12px" }}>{error}</p>}
+          <Btn full icon={ShieldCheck} disabled={!adminId.trim() || !password} type="submit">Sign in to admin portal</Btn>
+        </form>
+        <p style={{ color: C.grey, fontSize: 11, lineHeight: 1.5, margin: "14px 0 0" }}>
+          This prototype uses mock credentials only and does not provide real government authentication.
+        </p>
+      </Card>
+    </div>
+  );
+}
+
+function HomeScreen({ state, dispatch, onNav, lang, setLang }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const userToken = getActiveToken(state, profile?.id);
+  const uIdx = state.queue.findIndex((q) => q.id === state.userTokenId);
+  const ahead = uIdx === -1 ? 0 : state.queue.slice(0, uIdx).filter((q) => q.status === "waiting" || q.status === "serving").length;
+  const serving = state.queue.find((q) => q.status === "serving");
+
+  return (
+    <div style={{ padding: "18px 18px 12px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Logo size={32} />
+        <button onClick={() => setLang(lang === "hi" ? "en" : "hi")} style={{ display: "flex", alignItems: "center", gap: 5, background: C.cream, border: "none", borderRadius: 999, padding: "6px 11px", cursor: "pointer" }}>
+          <Languages size={13} color={C.navy} />
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: C.navy }}>{lang === "hi" ? "EN" : "हि"}</span>
+        </button>
+      </div>
+
+      <div className="rs-home-hero">
+        <div>
+          <span className="rs-eyebrow">SEPTEMBER 2026 · SERVICE OVERVIEW</span>
+          <h1>{t(dict.namaste)}, {profile?.name?.[lang] || "Seema Devi"} <span aria-hidden="true">👋</span></h1>
+          <p>{t(dict.usp)}</p>
+        </div>
+        <div className="rs-hero-mark"><Wheat size={25} /></div>
+      </div>
+
+      <Card style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 8px" }}>{t(dict.myRationCard)}</p>
+        <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 16, color: C.navy, margin: "0 0 10px" }}>{profile?.cardNo}</p>
+        <div style={{ display: "flex", gap: 18 }}>
+          <div>
+            <p style={{ fontSize: 10.5, color: C.grey, margin: 0 }}>{t(dict.familyMembers)}</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: C.navy, margin: "2px 0 0" }}>{profile?.familyCount}</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 10.5, color: C.grey, margin: 0 }}>{t(dict.assignedFps)}</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: C.navy, margin: "2px 0 0" }}>{profile?.fps?.code}, {profile?.fps?.name}</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: 0 }}>{t(dict.currentQueue)}</p>
+          {serving && <StatusPill status="serving" />}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ fontSize: 10.5, color: C.grey, margin: 0 }}>{t(dict.nowServing)}</p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 18, fontWeight: 800, color: C.green, margin: "2px 0 0" }}>{serving ? serving.id : "—"}</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 10.5, color: C.grey, margin: 0 }}>{t(dict.myToken)}</p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 18, fontWeight: 800, color: C.navy, margin: "2px 0 0" }}>{userToken ? userToken.id : "—"}</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 10.5, color: C.grey, margin: 0 }}>{t(dict.peopleAhead)}</p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 18, fontWeight: 800, color: C.navy, margin: "2px 0 0" }}>{userToken ? ahead : "—"}</p>
+          </div>
+        </div>
+        {userToken && (
+          <div style={{ marginTop: 10 }}>
+            <p style={{ fontSize: 12, color: C.grey, margin: "0 0 10px" }}>{t(dict.estWait)}: <b style={{ color: C.navy }}>{ahead * 6} {t(dict.min)}</b></p>
+            {userToken.status === "waiting" && (
+              <Btn
+                full
+                size="sm"
+                variant="danger"
+                icon={AlertTriangle}
+                onClick={() => {
+                  if (window.confirm(t(dict.cancelTokenConfirm))) dispatch({ type: "CANCEL_TOKEN", beneficiaryId: profile?.id });
+                }}
+              >
+                {t(dict.cancelToken)}
+              </Btn>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {!userToken && (
+        <Card style={{ marginBottom: 14, background: C.goldBg, border: "none" }}>
+          <p style={{ fontSize: 13, color: C.warningText, fontWeight: 600, margin: "0 0 10px" }}>{t(dict.noTokenYet)}</p>
+          <Btn size="sm" icon={Ticket} onClick={() => onNav("book")}>{t(dict.bookNow)}</Btn>
+        </Card>
+      )}
+
+      <p style={{ fontSize: 11, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 8px" }}>{t(dict.usp)}</p>
+      <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+        <button onClick={() => onNav("book")} style={{
+          flex: 1, textAlign: "left", cursor: "pointer", border: "none", borderRadius: 16,
+          background: C.navy, color: C.white, padding: "14px 12px",
+        }}>
+          <Ticket size={20} color={C.gold} style={{ marginBottom: 8 }} />
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, lineHeight: 1.3 }}>{t(dict.bookToken)}</p>
+          <p style={{ margin: "3px 0 0", fontSize: 10.5, color: "rgba(255,255,255,0.65)" }}>{t(dict.bookOnlineDesc)}</p>
+        </button>
+        <button onClick={() => onNav("scan")} style={{
+          flex: 1, textAlign: "left", cursor: "pointer", borderRadius: 16,
+          background: C.white, color: C.navy, padding: "14px 12px", border: `1.5px solid ${C.navy}`,
+        }}>
+          <Scan size={20} color={C.navy} style={{ marginBottom: 8 }} />
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, lineHeight: 1.3 }}>{t(dict.scanFpsQr)}</p>
+          <p style={{ margin: "3px 0 0", fontSize: 10.5, color: C.grey }}>{t(dict.offlineQrDesc)}</p>
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+        <Btn full variant="ghost" size="sm" icon={Wheat} onClick={() => onNav("entitlement")}>{t(dict.viewRationDetails)}</Btn>
+        <Btn full variant="ghost" size="sm" icon={Users} onClick={() => onNav("family")}>{t(dict.viewFamily)}</Btn>
+        <Btn full variant="ghost" size="sm" icon={History} onClick={() => onNav("profile")}>{t(dict.historyTitle)}</Btn>
+        <Btn full variant="ghost" size="sm" icon={AlertTriangle} onClick={() => onNav("complaints")}>{t(dict.complaintsTitle)}</Btn>
+      </div>
+    </div>
+  );
+}
+
+function EntitlementScreen({ onBack, onNav }) {
+  const { t, lang } = useT();
+  const { profile } = useBeneficiary();
+  const items = [
+    { key: "wheat", icon: Wheat, name: { hi: "गेहूं", en: "Wheat" }, entitled: "5 kg", issued: "5 kg", remaining: "0 kg", stock: "available" },
+    { key: "rice", icon: Package, name: { hi: "चावल", en: "Rice" }, entitled: "5 kg", issued: "5 kg", remaining: "0 kg", stock: "available" },
+    { key: "sugar", icon: Package, name: { hi: "चीनी", en: "Sugar" }, entitled: "1 kg", issued: "1 kg", remaining: "0 kg", stock: "limited" },
+    { key: "kerosene", icon: Package, name: { hi: "मिट्टी का तेल", en: "Kerosene" }, entitled: "2 L", issued: "0 L", remaining: "2 L", stock: "out" },
+  ].map((item) => ({ ...item, entitled: profile?.entitlement?.[item.key] || item.entitled }));
+  return (
+    <div>
+      <ScreenHeader title={t(dict.eCardTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        {/* Digital e-Ration Card */}
+        <div style={{ background: C.navy, borderRadius: 18, padding: 18, marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+            <div>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10.5, margin: "0 0 4px", letterSpacing: 0.4 }}>{t(dict.rationCardNumber)}</p>
+              <p style={{ color: C.white, fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: 16, margin: 0 }}>{profile?.cardNo}</p>
+            </div>
+            <IdCard size={26} color={C.gold} />
+          </div>
+          <p style={{ color: C.white, fontSize: 14, fontWeight: 600, margin: "0 0 10px" }}>{profile?.name?.[lang] || CARD_INFO.name}</p>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 10, margin: 0 }}>{t(dict.cardCategory)}</p>
+              <p style={{ color: C.gold, fontSize: 12.5, fontWeight: 700, margin: "2px 0 0" }}>{t(dict[profile?.categoryKey || CARD_INFO.categoryKey])}</p>
+            </div>
+            <div>
+              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 10, margin: 0 }}>{t(dict.familyMembers)}</p>
+              <p style={{ color: C.white, fontSize: 12.5, fontWeight: 700, margin: "2px 0 0" }}>{profile?.familyCount}</p>
+            </div>
+            <div>
+              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 10, margin: 0 }}>{t(dict.ekycStatus)}</p>
+              <div style={{ marginTop: 3 }}><EkycPill statusKey={profile?.familyMembers?.[0]?.ekyc || CARD_INFO.ekyc} /></div>
+            </div>
+          </div>
+        </div>
+
+        {onNav && (
+          <Btn full size="sm" variant="ghost" icon={Users} onClick={() => onNav("family")}>{t(dict.viewFamily)}</Btn>
+        )}
+
+        <p style={{ fontSize: 12.5, color: C.grey, margin: "18px 0 4px" }}>September 2026 · {t(dict.familyMembers)}: {profile?.familyCount || CARD_INFO.familyCount}</p>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "12px 0 10px" }}>{t(dict.entQty)}</p>
+        <div style={{ background: C.goldBg, borderRadius: 12, padding: 11, display: "flex", gap: 8, marginBottom: 12 }}>
+          <AlertTriangle size={15} color="#8A6410" style={{ flexShrink: 0 }} />
+          <p style={{ margin: 0, color: C.warningText, fontSize: 11.5, lineHeight: 1.4 }}>
+            {t(dict.stockAlert)}: {t({ hi: "चीनी सीमित है और मिट्टी का तेल उपलब्ध नहीं है।", en: "Sugar is limited and kerosene is out of stock." })}
+          </p>
+        </div>
+        {items.map((it) => (
+          <Card key={it.name.en} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: C.cream, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <it.icon size={18} color={C.navy} />
+                </div>
+                <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14.5 }}>{t(it.name)}</p>
+              </div>
+              <StockPill level={it.stock} />
+            </div>
+            <div style={{ display: "flex", gap: 16, paddingLeft: 50 }}>
+              <div>
+                <p style={{ fontSize: 10, color: C.grey, margin: 0 }}>{t(dict.entQty)}</p>
+                <p style={{ fontSize: 12.5, fontWeight: 700, color: C.navy, margin: "2px 0 0" }}>{it.entitled}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, color: C.grey, margin: 0 }}>{t(dict.issuedQty)}</p>
+                <p style={{ fontSize: 12.5, fontWeight: 700, color: C.navy, margin: "2px 0 0" }}>{it.issued}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, color: C.grey, margin: 0 }}>{t(dict.remainingQty)}</p>
+                <p style={{ fontSize: 12.5, fontWeight: 700, color: C.navy, margin: "2px 0 0" }}>{it.remaining}</p>
+              </div>
+            </div>
+          </Card>
+        ))}
+        <div style={{ background: C.cream, borderRadius: 14, padding: 14, marginTop: 8, display: "flex", gap: 10 }}>
+          <Info size={16} color={C.grey} style={{ flexShrink: 0, marginTop: 1 }} />
+          <p style={{ fontSize: 12, color: C.grey, margin: 0, lineHeight: 1.5 }}>{t(dict.entNote)} {t(dict.shopLevelNote)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FamilyScreen({ onBack }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  return (
+    <div>
+      <ScreenHeader title={t(dict.familyTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        {(profile?.familyMembers || FAMILY_MEMBERS).map((m, i) => (
+          <Card key={i} style={{ marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: "50%", background: C.cream, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <User size={17} color={C.navy} />
+              </div>
+              <div>
+                <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14 }}>{typeof m.name === "string" ? m.name : m.name.en}</p>
+                <p style={{ margin: "2px 0 0", fontSize: 11.5, color: C.grey }}>{t(dict[m.relKey])} · {t(dict.age)} {m.age}</p>
+              </div>
+            </div>
+            <EkycPill statusKey={m.ekyc} />
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReceiptScreen({ receipt, onBack, lang }) {
+  const { t } = useT();
+  if (!receipt) return <div><ScreenHeader title={t(dict.receiptTitle)} onBack={onBack} /></div>;
+  return (
+    <div>
+      <ScreenHeader title={t(dict.receiptTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        <div style={{ textAlign: "center", padding: "10px 0 18px" }}>
+          <CheckCircle2 size={38} color={C.green} style={{ marginBottom: 8 }} />
+          <p style={{ fontWeight: 700, color: C.navy, fontSize: 15, margin: 0 }}>{t(dict.distCompleted)}</p>
+        </div>
+        <Card style={{ marginBottom: 16 }}>
+          <Row label={t(dict.transactionId)} value={receipt.txnId} />
+          <Row label={t(dict.token)} value={receipt.token} />
+          <Row label={t(dict.date)} value={receipt.date} />
+          <Row label={t(dict.shop)} value={receipt.shop} last />
+        </Card>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.itemsDistributed)}</p>
+        <Card style={{ marginBottom: 16 }}>
+          {receipt.items.map((it, i) => (
+            <Row key={i} label={it.name[lang]} value={`${it.qty} / ${it.entitled || it.qty}`} last={i === receipt.items.length - 1} />
+          ))}
+        </Card>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.entitlementCompare)}</p>
+        <Card style={{ marginBottom: 16 }}>
+          {receipt.items.map((it, i) => (
+            <Row key={i} label={it.name[lang]} value={`${it.entitled || it.qty} → ${it.qty}`} last={i === receipt.items.length - 1} />
+          ))}
+        </Card>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.auditTimeline)}</p>
+        <Card style={{ marginBottom: 16 }}>
+          {(receipt.audit || []).slice(0, 6).map((entry, i) => (
+            <Row key={i} label={entry.event} value={entry.time} last={i === Math.min((receipt.audit || []).length, 6) - 1} />
+          ))}
+        </Card>
+        <Btn full variant="outline" icon={IdCard} onClick={() => {}}>{t(dict.downloadReceipt)}</Btn>
+      </div>
+    </div>
+  );
+}
+
+function ComplaintFormScreen({ dispatch, onBack, onSubmitted }) {
+  const { t } = useT();
+  const types = ["issueUnderweigh", "issueWrongQty", "issueNoStock", "issueNotReceived", "issueDealer", "issueOther"];
+  const [typeKey, setTypeKey] = useState(types[0]);
+  const [tokenRef, setTokenRef] = useState("");
+  const [desc, setDesc] = useState("");
+
+  return (
+    <div>
+      <ScreenHeader title={t(dict.fileComplaint)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.complaintType)}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+          {types.map((k) => (
+            <button key={k} onClick={() => setTypeKey(k)} style={{
+              textAlign: "left", padding: "11px 13px", borderRadius: 12, cursor: "pointer", fontSize: 13.5, fontWeight: 600,
+              border: `1.5px solid ${typeKey === k ? C.navy : C.greyLine}`,
+              background: typeKey === k ? C.navy : C.white, color: typeKey === k ? C.white : C.navy,
+            }}>
+              {t(dict[k])}
+            </button>
+          ))}
+        </div>
+
+        <label style={{ fontSize: 12, fontWeight: 600, color: C.grey }}>{t(dict.optionalTokenRef)}</label>
+        <input value={tokenRef} onChange={(e) => setTokenRef(e.target.value)} placeholder="A124"
+          style={{ width: "100%", boxSizing: "border-box", fontSize: 13.5, border: `1.5px solid ${C.greyLine}`, borderRadius: 10, padding: "10px 12px", margin: "6px 0 14px", fontFamily: "Inter", outline: "none" }} />
+
+        <label style={{ fontSize: 12, fontWeight: 600, color: C.grey }}>{t(dict.complaintDesc)}</label>
+        <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3}
+          style={{ width: "100%", boxSizing: "border-box", fontSize: 13.5, border: `1.5px solid ${C.greyLine}`, borderRadius: 10, padding: "10px 12px", margin: "6px 0 18px", fontFamily: "Inter", outline: "none", resize: "none" }} />
+
+        <Btn full icon={AlertTriangle} onClick={() => { dispatch({ type: "FILE_COMPLAINT", typeKey, tokenRef, desc }); onSubmitted(); }}>
+          {t(dict.submitComplaint)}
+        </Btn>
+      </div>
+    </div>
+  );
+}
+
+function ComplaintsScreen({ state, dispatch, onBack, onNav }) {
+  const { t, lang } = useT();
+  const statusMap = { submitted: "statusSubmitted", review: "statusReview", resolved: "statusResolved" };
+  const statusColor = { submitted: { bg: C.goldBg, fg: C.warningText }, review: { bg: C.infoBg, fg: C.infoText }, resolved: { bg: C.greenBg, fg: C.green } };
+  return (
+    <div>
+      <ScreenHeader title={t(dict.complaintsTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        <Btn full size="sm" icon={AlertTriangle} onClick={() => onNav("complaintForm")}>{t(dict.fileComplaint)}</Btn>
+        <div style={{ marginTop: 16 }}>
+          {state.complaints.length === 0 ? (
+            <p style={{ color: C.grey, fontSize: 12.5, textAlign: "center", marginTop: 20 }}>{t(dict.noComplaintsYet)}</p>
+          ) : state.complaints.map((c) => {
+            const sc = statusColor[c.status];
+            return (
+              <Card key={c.id} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 13.5 }}>{t(dict[c.typeKey])}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 11, color: C.grey }}>{t(dict.complaintId)}: {c.id} · {c.date}</p>
+                  </div>
+                  <span style={{ background: sc.bg, color: sc.fg, fontSize: 11.5, fontWeight: 700, padding: "3px 9px", borderRadius: 999, whiteSpace: "nowrap" }}>
+                    {t(dict[statusMap[c.status]])}
+                  </span>
+                </div>
+                {c.desc && <p style={{ margin: "6px 0 0", fontSize: 12, color: C.grey }}>{c.desc}</p>}
+                {c.status !== "resolved" && (
+                  <div style={{ marginTop: 10 }}>
+                    <Btn size="sm" variant="ghost" icon={RefreshCw} onClick={() => dispatch({ type: "ADVANCE_COMPLAINT", id: c.id })}>{t(dict.advanceDemo)}</Btn>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BookTokenScreen({ state, dispatch, onBack, onBooked }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const activeToken = getActiveToken(state, profile?.id);
+  const slots = ["9:00 AM", "9:20 AM", "9:40 AM", "10:00 AM", "10:20 AM", "10:30 AM"];
+  const [selected, setSelected] = useState("10:30 AM");
+
+  return (
+    <div>
+      <ScreenHeader title={t(dict.bookSlotTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        <Card style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14.5 }}>{profile?.fps?.code} · {profile?.fps?.name}</p>
+            <p style={{ margin: "3px 0 0", fontSize: 12, color: C.grey }}>{t(dict.nowServing)}: A120 · {t(dict.estWait)} 18 {t(dict.min)}</p>
+          </div>
+          <StatusPill status="serving" />
+        </Card>
+
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.chooseSlot)}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9, marginBottom: 14 }}>
+          {slots.map((s) => (
+            <button key={s} onClick={() => setSelected(s)} style={{
+              padding: "12px 8px", borderRadius: 12, cursor: "pointer", fontWeight: 700, fontSize: 13.5,
+              border: `1.5px solid ${selected === s ? C.navy : C.greyLine}`,
+              background: selected === s ? C.navy : C.white, color: selected === s ? C.white : C.navy,
+            }}>
+              {s}
+            </button>
+          ))}
+        </div>
+        <p style={{ fontSize: 11.5, color: C.grey, margin: "0 0 18px", lineHeight: 1.5 }}>{t(dict.slotCapacityNote)}</p>
+
+        {activeToken ? (
+          <Card style={{ border: `1px solid ${C.gold}`, background: C.goldBg }}>
+            <p style={{ margin: "0 0 6px", color: C.navy, fontSize: 13, fontWeight: 800 }}>An active token already exists</p>
+            <p style={{ margin: "0 0 12px", color: C.grey, fontSize: 12, lineHeight: 1.45 }}>
+              Token <b style={{ color: C.navy }}>{activeToken.id}</b> is still {activeToken.status === "serving" ? "in service" : "active"}. Cancel it before generating another token.
+            </p>
+            <Btn full variant="danger" icon={AlertTriangle} onClick={() => {
+              if (window.confirm(t(dict.cancelTokenConfirm))) dispatch({ type: "CANCEL_TOKEN", beneficiaryId: profile?.id });
+            }}>{t(dict.cancelToken)} {activeToken.id}</Btn>
+          </Card>
+        ) : (
+          <Btn full icon={CheckCircle2} onClick={() => { dispatch({ type: "BOOK_ONLINE", beneficiaryId: profile?.id, beneficiaryName: profile?.name?.en }); onBooked(); }}>
+            {t(dict.confirmToken)}
+          </Btn>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ScanScreen({ state, dispatch, onBack, onDone }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const [phase, setPhase] = useState("scan"); // scan -> verified -> details -> generated
+  const activeToken = getActiveToken(state, profile?.id);
+
+  return (
+    <div>
+      <ScreenHeader title={t(dict.scanTitle)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        {phase === "scan" && (
+          <>
+            <p style={{ fontSize: 13, color: C.grey, margin: "0 0 20px" }}>{t(dict.scanSub)}</p>
+            <button onClick={() => setPhase("verified")} style={{
+              width: "100%", aspectRatio: "1", borderRadius: 20, border: `2.5px dashed ${C.navy}`,
+              background: C.cream, display: "flex", flexDirection: "column", alignItems: "center",
+              justifyContent: "center", gap: 12, cursor: "pointer", marginBottom: 16,
+            }}>
+              <ScanLine size={54} color={C.navy} />
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: C.navy }}>{t(dict.tapToScan)}</span>
+            </button>
+          </>
+        )}
+
+        {phase === "verified" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: C.green, fontWeight: 700, marginBottom: 16 }}>
+              <CheckCircle2 size={19} /> {t(dict.fpsVerified)}
+            </div>
+            <Card style={{ marginBottom: 16 }}>
+              <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 15 }}>{profile?.fps?.code} · {profile?.fps?.name}</p>
+              <p style={{ margin: "6px 0 0", fontSize: 12.5, color: C.grey }}>{t(dict.nowServing)}: A120 · {t(dict.estWait)} 18 {t(dict.min)}</p>
+            </Card>
+            <Btn full icon={UserCheck} onClick={() => setPhase("details")}>{t(dict.verifyDetails)}</Btn>
+          </>
+        )}
+
+        {phase === "details" && (
+          <>
+            <Card style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, margin: "0 0 8px" }}>{t(dict.verifyDetails)}</p>
+              <p style={{ margin: "0 0 4px", fontSize: 13.5, color: C.navy }}><b>{t(dict.rationCardNumber)}:</b> XXXX-1234</p>
+              <p style={{ margin: 0, fontSize: 13.5, color: C.navy }}><b>{t(dict.familyMembers)}:</b> 5</p>
+            </Card>
+            {activeToken ? (
+              <Card style={{ border: `1px solid ${C.gold}`, background: C.goldBg }}>
+                <p style={{ margin: "0 0 6px", color: C.navy, fontSize: 13, fontWeight: 800 }}>An active token already exists</p>
+                <p style={{ margin: "0 0 12px", color: C.grey, fontSize: 12, lineHeight: 1.45 }}>
+                  Token <b style={{ color: C.navy }}>{activeToken.id}</b> must be cancelled before an offline QR token can be generated.
+                </p>
+                <Btn full variant="danger" icon={AlertTriangle} onClick={() => {
+                  if (window.confirm(t(dict.cancelTokenConfirm))) dispatch({ type: "CANCEL_TOKEN", beneficiaryId: profile?.id });
+                }}>{t(dict.cancelToken)} {activeToken.id}</Btn>
+              </Card>
+            ) : (
+              <Btn full icon={Ticket} onClick={() => { dispatch({ type: "GENERATE_QR_TOKEN", beneficiaryId: profile?.id, beneficiaryName: profile?.name?.en }); setPhase("generated"); }}>
+                {t(dict.generateToken)}
+              </Btn>
+            )}
+          </>
+        )}
+
+        {phase === "generated" && (
+          <div style={{ textAlign: "center", paddingTop: 10 }}>
+            <CheckCircle2 size={40} color={C.green} style={{ marginBottom: 10 }} />
+            <p style={{ fontSize: 13, color: C.grey, margin: "0 0 4px" }}>{t(dict.token)}</p>
+            <p style={{ fontFamily: "Poppins, sans-serif", fontSize: 32, fontWeight: 800, color: C.navy, margin: "0 0 14px" }}>{state.userTokenId || "A125"}</p>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 20 }}>
+              <ModePill mode="qr" />
+              <StatusPill status="waiting" />
+            </div>
+            <p style={{ fontSize: 12, color: C.grey, marginBottom: 20 }}>
+              {t(dict.unifiedSub)}
+            </p>
+            <Btn full icon={Users} onClick={onDone}>{t(dict.viewLiveQueue)}</Btn>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MyTokenScreen({ state, dispatch, onBack, onNav }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const userToken = getActiveToken(state, profile?.id);
+  const uIdx = state.queue.findIndex((q) => q.id === userToken?.id);
+  const ahead = uIdx === -1 ? 0 : state.queue.slice(0, uIdx).filter((q) => q.status === "waiting" || q.status === "serving").length;
+  const serving = state.queue.find((q) => q.status === "serving");
+
+  if (!userToken) {
+    return (
+      <div>
+        <ScreenHeader title={t(dict.myToken)} onBack={onBack} />
+        <div style={{ padding: 40, textAlign: "center" }}>
+          <Ticket size={36} color={C.greyLine} style={{ marginBottom: 12 }} />
+          <p style={{ color: C.grey, fontSize: 13.5, marginBottom: 18 }}>{t(dict.noTokenYet)}</p>
+          <Btn icon={Ticket} onClick={() => onNav("book")}>{t(dict.bookNow)}</Btn>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <ScreenHeader title={t(dict.myToken)} onBack={onBack} />
+      <div style={{ padding: "8px 18px" }}>
+        <div style={{ background: C.navy, borderRadius: 20, padding: 22, textAlign: "center", marginBottom: 16 }}>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 11.5, margin: "0 0 6px", letterSpacing: 0.4 }}>{t(dict.yourToken)}</p>
+          <p style={{ color: C.white, fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: 44, margin: "0 0 12px" }}>{userToken.id}</p>
+          <div style={{ display: "inline-block", background: C.white, padding: 10, borderRadius: 12 }}>
+            <QrCode size={72} color={C.navyDeep} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 14 }}>
+            <ModePill mode={userToken.mode} />
+            <StatusPill status={userToken.status} />
+          </div>
+        </div>
+
+        <Card style={{ marginBottom: 16 }}>
+          <Row label={t(dict.scheduled)} value={userToken.time} />
+          <Row label={t(dict.nowServing)} value={serving ? serving.id : "—"} />
+          <Row label={t(dict.peopleAhead)} value={ahead} />
+          <Row label={t(dict.estWait)} value={`${ahead * 6} ${t(dict.min)}`} />
+          <Row label={t(dict.assignedFps)} value={`${profile?.fps?.code} · ${profile?.fps?.name}`} last />
+        </Card>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ flex: 1 }}><Btn full variant="outline" icon={Users} onClick={() => onNav("queue")}>{t(dict.viewLiveQueue)}</Btn></div>
+          <div style={{ flex: 1 }}><Btn full variant="ghost" icon={Navigation} onClick={() => {}}>{t(dict.getDirections)}</Btn></div>
+        </div>
+        {userToken.status === "waiting" && (
+          <div style={{ marginTop: 12 }}>
+            <Btn
+              full
+              variant="danger"
+              icon={AlertTriangle}
+              onClick={() => {
+                if (window.confirm(t(dict.cancelTokenConfirm))) {
+                  dispatch({ type: "CANCEL_TOKEN", beneficiaryId: profile?.id });
+                  onNav("home");
+                }
+              }}
+            >
+              {t(dict.cancelToken)}
+            </Btn>
+            <p style={{ margin: "8px 0 0", textAlign: "center", fontSize: 11.5, color: C.grey }}>{t(dict.cancelBeforeVisit)}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, last }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: last ? "none" : `1px solid ${C.greyLine}` }}>
+      <span style={{ fontSize: 12.5, color: C.grey }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: C.navy }}>{value}</span>
+    </div>
+  );
+}
+
+function LiveQueueScreen({ state, lang }) {
+  const { t } = useT();
+  const serving = state.queue.find((q) => q.status === "serving");
+  const visibleQueue = state.queue.filter((q) => q.status !== "completed" && q.status !== "noshow");
+
+  return (
+    <div>
+      <ScreenHeader title={t(dict.liveQueueTitle)} />
+      <div style={{ padding: "8px 18px" }}>
+        <Card style={{ marginBottom: 14, textAlign: "center", background: C.greenBg, border: "none" }}>
+          <p style={{ fontSize: 11.5, color: C.green, margin: "0 0 4px", fontWeight: 700 }}>{t(dict.nowServing)}</p>
+          <p style={{ fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: 30, color: C.green, margin: 0 }}>{serving ? serving.id : "—"}</p>
+        </Card>
+
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.upcomingTokens)}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {visibleQueue.map((q) => {
+            const isUser = q.id === state.userTokenId;
+            return (
+              <div key={q.id} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 13px",
+                borderRadius: 14, background: isUser ? C.goldBg : C.white, border: `1.5px solid ${isUser ? C.gold : C.greyLine}`,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: 15, color: C.navy, minWidth: 44 }}>{q.id}</span>
+                  <ModePill mode={q.mode} />
+                  {isUser && <span style={{ fontSize: 10.5, fontWeight: 700, color: C.warningText }}>({t(dict.yourTokenTag)})</span>}
+                </div>
+                <StatusPill status={q.status} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NotifScreen({ state }) {
+  const { t, lang } = useT();
+  const { profile } = useBeneficiary();
+  const iconFor = (i) => (i === "check" ? CheckCircle2 : Bell);
+  const whatsapp = state.whatsappMessages || [];
+  const notifications = profile?.notifications || state.notifications;
+  return (
+    <div>
+      <ScreenHeader title={t(dict.notifTitle)} />
+      <div style={{ padding: "8px 18px" }}>
+        {notifications.length === 0 && (
+          <p style={{ color: C.grey, fontSize: 13, textAlign: "center", marginTop: 30 }}>—</p>
+        )}
+        {notifications.map((n, i) => {
+          const Icon = iconFor(n.icon);
+          return (
+            <Card key={i} style={{ marginBottom: 10, display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: n.icon === "check" ? C.greenBg : C.goldBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon size={16} color={n.icon === "check" ? C.green : "#9C6A16"} />
+              </div>
+              <div>
+                <p style={{ margin: "0 0 3px", fontWeight: 700, fontSize: 13.5, color: C.navy }}>{n.title[lang]}</p>
+                <p style={{ margin: 0, fontSize: 12.5, color: C.grey, lineHeight: 1.4 }}>{n.body[lang]}</p>
+              </div>
+            </Card>
+          );
+        })}
+        {whatsapp.map((item) => (
+          <Card key={item.id} style={{ marginBottom: 10, display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: C.infoBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Phone size={16} color={C.navy} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+                <p style={{ margin: "0 0 3px", fontWeight: 700, fontSize: 13.5, color: C.navy }}>WhatsApp demo · {item.contact}</p>
+                <span className={`rs-wa-status ${item.status}`}>{item.status}</span>
+              </div>
+              <p style={{ margin: 0, fontSize: 12.5, color: C.grey, lineHeight: 1.4 }}>{item.message}</p>
+              <p style={{ margin: "5px 0 0", fontSize: 10.5, color: C.grey }}>{item.number} · {item.sentAt}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProfileScreen({ state, onLogout, lang, setLang, onViewReceipt }) {
+  const { t } = useT();
+  const { profile } = useBeneficiary();
+  const history = (profile?.history || state.history).map((item) => ({
+    ...item,
+    month: typeof item.month === "string" ? { en: item.month, hi: item.month } : item.month,
+  }));
+  return (
+    <div>
+      <ScreenHeader title={t(dict.profileTitle)} />
+      <div style={{ padding: "8px 18px" }}>
+        <Card style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: C.cream, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <User size={22} color={C.navy} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 15, color: C.navy }}>{profile?.name?.[lang] || "Seema Devi"}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: C.grey }}>{profile?.id} · {profile?.cardNo}</p>
+          </div>
+        </Card>
+
+        <Card style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: C.navy }}>{dict.roleSwitch ? (lang === "hi" ? "भाषा" : "Language") : ""}</span>
+            <button onClick={() => setLang(lang === "hi" ? "en" : "hi")} style={{ display: "flex", alignItems: "center", gap: 5, background: C.cream, border: "none", borderRadius: 999, padding: "6px 12px", cursor: "pointer" }}>
+              <Languages size={13} color={C.navy} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.navy }}>{lang === "hi" ? "हिंदी" : "English"}</span>
+            </button>
+          </div>
+        </Card>
+
+        <p style={{ fontSize: 11.5, fontWeight: 700, color: C.grey, letterSpacing: 0.3, margin: "0 0 10px" }}>{t(dict.historyTitle)}</p>
+        {history.length === 0 ? (
+          <p style={{ color: C.grey, fontSize: 12.5 }}>{t(dict.noHistoryYet)}</p>
+        ) : history.map((h, i) => (
+          <Card key={i} style={{ marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: h.txnId ? 10 : 0 }}>
+              <div>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 13.5, color: C.navy }}>{h.month[lang]}</p>
+                <p style={{ margin: "2px 0 0", fontSize: 11.5, color: C.grey }}>{t(dict.token)} {h.token}</p>
+              </div>
+              <StatusPill status="completed" />
+            </div>
+            {h.txnId && (
+              <Btn size="sm" variant="ghost" icon={IdCard} onClick={() => onViewReceipt && onViewReceipt(h)}>{t(dict.viewReceipt)}</Btn>
+            )}
+          </Card>
+        ))}
+
+        <div style={{ marginTop: 20 }}>
+          <Btn full variant="danger" icon={LogOut} onClick={onLogout}>{t(dict.logout)}</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
+   BENEFICIARY APP SHELL
+   ========================================================================= */
+function BeneficiaryApp({ state, dispatch, lang, setLang }) {
+  const [screen, setScreen] = useState("splash");
+  const [navTab, setNavTab] = useState("home");
+  const [activeReceipt, setActiveReceipt] = useState(null);
+  const [profile, setProfile] = useState(findBeneficiary("BEN-001"));
+
+  const goTab = (tab) => { setNavTab(tab); setScreen(tab); };
+  const navFromHome = (dest) => {
+    // keep bottom-nav highlight in sync when Home's quick links jump to a tab screen
+    if (["home", "queue", "notif", "profile"].includes(dest)) { goTab(dest); } else { setScreen(dest); }
+  };
+
+  let content;
+  let showNav = false;
+
+  switch (screen) {
+    case "splash":
+      content = <SplashScreen onStart={(selectedLang) => { if (selectedLang) setLang(selectedLang); setScreen("login"); }} />;
+      break;
+    case "login":
+      content = <LoginScreen onDone={(selectedProfile) => { setProfile(selectedProfile); setScreen("home"); setNavTab("home"); }} />;
+      break;
+    case "home":
+      content = <HomeScreen state={state} dispatch={dispatch} onNav={navFromHome} lang={lang} setLang={setLang} />;
+      showNav = true;
+      break;
+    case "entitlement":
+      content = <EntitlementScreen onBack={() => setScreen("home")} onNav={setScreen} />;
+      break;
+    case "family":
+      content = <FamilyScreen onBack={() => setScreen("home")} />;
+      break;
+    case "complaints":
+      content = <ComplaintsScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onNav={setScreen} />;
+      break;
+    case "complaintForm":
+      content = <ComplaintFormScreen dispatch={dispatch} onBack={() => setScreen("complaints")} onSubmitted={() => setScreen("complaints")} />;
+      break;
+    case "receipt":
+      content = <ReceiptScreen receipt={activeReceipt} onBack={() => setScreen("profile")} lang={lang} />;
+      break;
+    case "book":
+      content = <BookTokenScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onBooked={() => setScreen("token")} />;
+      break;
+    case "scan":
+      content = <ScanScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onDone={() => goTab("queue")} />;
+      break;
+    case "token":
+      content = <MyTokenScreen state={state} dispatch={dispatch} onBack={() => setScreen("home")} onNav={setScreen} />;
+      break;
+    case "queue":
+      content = <LiveQueueScreen state={state} lang={lang} />;
+      showNav = true;
+      break;
+    case "notif":
+      content = <NotifScreen state={state} />;
+      showNav = true;
+      break;
+    case "profile":
+      content = (
+        <ProfileScreen
+          state={state} lang={lang} setLang={setLang}
+          onLogout={() => setScreen("splash")}
+          onViewReceipt={(h) => { setActiveReceipt(h); setScreen("receipt"); }}
+        />
+      );
+      showNav = true;
+      break;
+    default:
+      content = null;
+  }
+
+  const sidebar = showNav ? <SideNav active={navTab} onNav={goTab} onLogout={() => setScreen("splash")} /> : null;
+  return (
+    <BeneficiaryCtx.Provider value={{ profile, source: getBeneficiarySource() }}>
+      <AppShell state={state} active={screen} onNav={navFromHome} sidebar={sidebar} footer={showNav ? <BottomNav active={navTab} onNav={goTab} /> : null}>
+        {content}
+      </AppShell>
+    </BeneficiaryCtx.Provider>
+  );
+}
+
+/* =========================================================================
+   DEALER DASHBOARD
+   ========================================================================= */
+function OperationsPortalFrame({ children, onLogout, portal = "dealer" }) {
+  const { t } = useT();
+  const isAdmin = portal === "admin";
+  const links = isAdmin ? [
+    { label: "Operations overview", icon: LayoutDashboard, active: true },
+    { label: "Stock & allocation", icon: Package },
+    { label: "Distribution analytics", icon: BarChart3 },
+    { label: "Communications", icon: Bell },
+  ] : [
+    { label: "Operations overview", icon: LayoutDashboard, active: true },
+    { label: "Queue management", icon: Users },
+    { label: "Stock & allocation", icon: Package },
+    { label: "Distribution register", icon: ClipboardCheck },
+  ];
+  return (
+    <div className="rs-ops-shell">
+      <aside className="rs-ops-sidebar">
+        <div className="rs-ops-brand"><Logo size={38} /><span>{isAdmin ? "ADMIN CONSOLE" : "DEALER CONSOLE"}</span></div>
+        <div className="rs-ops-location"><span className="rs-status-dot" /> {isAdmin ? "STATE PDS CONTROL" : "FPS-102"} <small>{isAdmin ? "District operations" : "Shanti Nagar"}</small></div>
+        <nav className="rs-ops-nav" aria-label={`${isAdmin ? "Admin" : "Dealer"} navigation`}>
+          <p>{isAdmin ? "Control centre" : "Operations"}</p>
+          {links.map(({ label, icon: Icon, active }) => (
+            <button key={label} className={active ? "is-active" : ""} type="button">
+              <Icon size={17} /> <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="rs-ops-bottom">
+          <div className="rs-ops-security"><ShieldCheck size={17} /><span><b>Secure session</b><small>Last synced just now</small></span></div>
+          <button type="button" onClick={onLogout}><LogOut size={16} /> {t(dict.logout)}</button>
+        </div>
+      </aside>
+      <main className="rs-ops-main">
+        <header className="rs-ops-header">
+          <div>
+            <span className="rs-portal-breadcrumb">PUBLIC DISTRIBUTION SYSTEM / DEALER</span>
+            <h1>{isAdmin ? "Admin operations overview" : "Operations overview"}</h1>
+          </div>
+          <div className="rs-ops-header-actions">
+            <span className="rs-service-status"><span className="rs-status-dot" /> {isAdmin ? "Demo system" : "Live system"}</span>
+            <button className="rs-header-icon" type="button" aria-label="Notifications"><Bell size={17} /></button>
+            <div className="rs-header-user"><span className="rs-avatar">D</span><span>FPS Operator</span></div>
+          </div>
+        </header>
+        <div className="rs-ops-subnav">
+          <span>{isAdmin ? "Control centre · 15 September 2026" : "Today · 15 September 2026"}</span>
+          <span className="rs-subnav-divider" />
+          <span>{isAdmin ? "All district locations" : "Distribution window 09:00–17:00"}</span>
+          <span className="rs-subnav-spacer" />
+          <button type="button"><RefreshCw size={13} /> Sync data</button>
+        </div>
+        <div className="rs-ops-content">{children}</div>
+      </main>
+    </div>
+  );
+}
+
+function DealerPortalFrame({ children, onLogout }) {
+  return <OperationsPortalFrame onLogout={onLogout} portal="dealer">{children}</OperationsPortalFrame>;
+}
+
+function DealerDashboard({ state, dispatch, lang, onLogout }) {
+  const { t } = useT();
+  const [verifyId, setVerifyId] = useState("");
+  const [verified, setVerified] = useState(null);
+  const [distributionOtp, setDistributionOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [distributed, setDistributed] = useState({ wheat: "5 kg", rice: "5 kg", sugar: "1 kg" });
+
+  const waitingCount = state.queue.filter((q) => q.status === "waiting").length;
+  const servingCount = state.queue.filter((q) => q.status === "serving").length;
+  const visible = state.queue.filter((q) => q.status !== "completed" && q.status !== "noshow");
+  const onlineCount = state.queue.filter((q) => q.mode === "online" && q.status !== "noshow").length;
+  const qrCount = state.queue.filter((q) => q.mode === "qr" && q.status !== "noshow").length;
+  const pendingCount = waitingCount + servingCount;
+  const dealerStock = [
+    { name: { hi: "गेहूं", en: "Wheat" }, level: "available" },
+    { name: { hi: "चावल", en: "Rice" }, level: "available" },
+    { name: { hi: "चीनी", en: "Sugar" }, level: "limited" },
+    { name: { hi: "मिट्टी का तेल", en: "Kerosene" }, level: "out" },
+  ];
+
+  const doVerify = () => {
+    const found = state.queue.find((q) => q.id.toUpperCase() === verifyId.trim().toUpperCase());
+    setDistributionOtp("");
+    setOtpError("");
+    setVerified(found && found.status !== "completed" && found.status !== "noshow" ? found : "notfound");
+  };
+
+  const generateOtp = () => {
+    dispatch({ type: "GENERATE_DISTRIBUTION_OTP", tokenId: verified.id });
+    setDistributionOtp("");
+    setOtpError("");
+  };
+
+  const completeWithOtp = () => {
+    if (!state.pendingDistribution || state.pendingDistribution.tokenId !== verified.id) {
+      setOtpError(t(dict.otpRequired));
+      return;
+    }
+    if (distributionOtp.trim().toUpperCase() !== String(state.pendingDistribution.otp).toUpperCase()) {
+      setOtpError(t(dict.invalidOtp));
+      return;
+    }
+    dispatch({
+      type: "COMPLETE_DISTRIBUTION",
+      tokenId: verified.id,
+      otp: distributionOtp,
+      items: [
+        { name: { hi: "गेहूं", en: "Wheat" }, entitled: "5 kg", qty: distributed.wheat },
+        { name: { hi: "चावल", en: "Rice" }, entitled: "5 kg", qty: distributed.rice },
+        { name: { hi: "चीनी", en: "Sugar" }, entitled: "1 kg", qty: distributed.sugar },
+      ],
+    });
+    setVerified(null);
+    setVerifyId("");
+    setDistributionOtp("");
+    setOtpError("");
+  };
+
+  return (
+    <DealerPortalFrame onLogout={onLogout}>
+    <div className="rs-dashboard-content" style={{ maxWidth: 1120, margin: "0 auto", width: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22, flexWrap: "wrap", gap: 10 }}>
+        <Logo size={36} />
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14 }}>{t(dict.officialPortal)}</p>
+          <p style={{ margin: 0, fontSize: 12, color: C.grey }}>FPS-102 · Shanti Nagar</p>
+        </div>
+      </div>
+
+      <p style={{ fontSize: 12, fontWeight: 700, color: C.grey, letterSpacing: 0.4, margin: "0 0 10px" }}>{t(dict.todaysOverview)}</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px,1fr))", gap: 10, marginBottom: 12 }}>
+        <StatBox label={t(dict.totalTokens)} value={state.totalToday} />
+        <StatBox label={t(dict.pendingBeneficiaries)} value={pendingCount} accent={C.gold} />
+        <StatBox label={t(dict.completed)} value={state.completedCount} accent={C.grey} />
+        <StatBox label={t(dict.avgWait)} value={`${state.avgWaitMin} ${t(dict.min)}`} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px,1fr))", gap: 10, marginBottom: 20 }}>
+        <StatBox label={t(dict.onlineTokensLbl)} value={onlineCount} accent={C.infoText} />
+        <StatBox label={t(dict.qrTokensLbl)} value={qrCount} accent={C.warningText} />
+        <StatBox label={t(dict.serving)} value={servingCount} accent={C.green} />
+        <StatBox label={t(dict.estCompletion)} value={"1:20 PM"} />
+      </div>
+
+      <div className="rs-dealer-grid" style={{ display: "grid", gap: 18, alignItems: "start" }}>
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: C.grey, letterSpacing: 0.4, margin: 0 }}>{t(dict.liveQueueTitle)}</p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Btn size="sm" variant="outline" icon={QrCode} onClick={() => dispatch({ type: "GENERATE_QR_TOKEN", beneficiaryId: "demo-imran-card" })}>Walk-in QR</Btn>
+              <Btn size="sm" variant="danger" icon={AlertTriangle} onClick={() => dispatch({ type: "MARK_NOSHOW" })}>{t(dict.markNoShow)}</Btn>
+            </div>
+          </div>
+
+          <Card style={{ padding: 0, overflow: "hidden" }}>
+            <div className="rs-table-scroll">
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 420 }}>
+                <thead>
+                  <tr style={{ background: C.cream }}>
+                    {[t(dict.token), t(dict.beneficiary), t(dict.status)].map((h) => (
+                      <th key={h} style={{ textAlign: "left", padding: "10px 14px", fontSize: 11, color: C.grey, fontWeight: 700 }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {visible.map((q) => (
+                    <tr key={q.id} style={{ borderTop: `1px solid ${C.greyLine}`, background: q.status === "serving" ? C.greenBg : "transparent" }}>
+                      <td style={{ padding: "11px 14px", fontWeight: 800, color: C.navy, fontFamily: "Poppins, sans-serif" }}>{q.id}</td>
+                      <td style={{ padding: "11px 14px", fontSize: 13, color: C.navy, fontWeight: 600 }}>{q.name.split(" / ")[1] || q.name}</td>
+                      <td style={{ padding: "11px 14px" }}><StatusPill status={q.status} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <div style={{ marginTop: 14 }}>
+            <Btn full size="md" icon={ArrowRight} onClick={() => dispatch({ type: "CALL_NEXT" })}>{t(dict.callNext)}</Btn>
+          </div>
+        </div>
+
+        <div>
+          <p style={{ fontSize: 12, fontWeight: 700, color: C.grey, letterSpacing: 0.4, margin: "0 0 10px" }}>{t(dict.verifyToken)}</p>
+          <Card>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <input value={verifyId} onChange={(e) => setVerifyId(e.target.value)} placeholder={t(dict.enterTokenId)}
+                style={{ flex: 1, border: `1.5px solid ${C.greyLine}`, borderRadius: 10, padding: "9px 12px", fontSize: 13, outline: "none", fontFamily: "Inter" }} />
+              <Btn size="sm" icon={ClipboardCheck} onClick={doVerify}>{t(dict.verify)}</Btn>
+            </div>
+            {verified === "notfound" && <p style={{ color: C.red, fontSize: 12.5 }}>{t(dict.token)} {t(dict.unavailable)}</p>}
+            {verified && verified !== "notfound" && (
+              <div>
+                <Row label={t(dict.token)} value={verified.id} />
+                <Row label={t(dict.beneficiary)} value={verified.name.split(" / ")[1] || verified.name} />
+                <Row label={t(dict.status)} value={<StatusPill status={verified.status} />} last />
+                {verified.status === "serving" && (
+                  <div style={{ marginTop: 12 }}>
+                    {!state.pendingDistribution && (
+                      <Btn full size="sm" variant="green" icon={KeyRound} onClick={generateOtp}>{t(dict.generateOtp)}</Btn>
+                    )}
+                    {state.pendingDistribution?.tokenId === verified.id && (
+                      <div style={{ marginTop: 12, padding: 12, borderRadius: 10, background: C.greenBg }}>
+                        <p style={{ margin: "0 0 8px", color: C.green, fontSize: 12, fontWeight: 700 }}>{t(dict.otpSentDemo)}: <strong>{verified.id}</strong></p>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 8 }}>
+                          {[
+                            ["wheat", "Wheat"],
+                            ["rice", "Rice"],
+                            ["sugar", "Sugar"],
+                          ].map(([key, label]) => (
+                            <label key={key} style={{ fontSize: 10.5, color: C.grey }}>
+                              {label}
+                              <input
+                                value={distributed[key]}
+                                onChange={(e) => setDistributed((current) => ({ ...current, [key]: e.target.value }))}
+                                style={{ width: "100%", border: `1px solid ${C.greyLine}`, borderRadius: 7, padding: "7px 5px", marginTop: 3, fontSize: 11 }}
+                              />
+                            </label>
+                          ))}
+                        </div>
+                        <p style={{ margin: "0 0 8px", color: C.grey, fontSize: 11 }}>{t(dict.demoSecurityNote)}</p>
+                        <input
+                          value={distributionOtp}
+                          onChange={(e) => { setDistributionOtp(e.target.value.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 8)); setOtpError(""); }}
+                          placeholder="••••"
+                          inputMode="text"
+                          autoCapitalize="characters"
+                          autoComplete="one-time-code"
+                          maxLength={8}
+                          style={{ width: "100%", border: `1.5px solid ${C.greyLine}`, borderRadius: 9, padding: "10px 12px", fontSize: 16, letterSpacing: 5, textAlign: "center", outline: "none", marginBottom: 8 }}
+                        />
+                        {otpError && <p style={{ margin: "0 0 8px", color: C.red, fontSize: 11.5 }}>{otpError}</p>}
+                        <Btn full size="sm" variant="green" icon={CheckCircle2} disabled={distributionOtp.length < 4} onClick={completeWithOtp}>{t(dict.completeDistribution)}</Btn>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            {!verified && <p style={{ fontSize: 12, color: C.grey, margin: 0 }}>e.g. A120, A124</p>}
+          </Card>
+
+          <div style={{ marginTop: 14 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: C.grey, letterSpacing: 0.4, margin: "0 0 10px" }}>{t(dict.fpsStock)}</p>
+            <Card>
+              {dealerStock.map((s, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", borderBottom: i === dealerStock.length - 1 ? "none" : `1px solid ${C.greyLine}` }}>
+                  <span style={{ fontSize: 13, color: C.navy, fontWeight: 600 }}>{s.name[lang]}</span>
+                  <StockPill level={s.level} />
+                </div>
+              ))}
+            </Card>
+          </div>
+
+          <div style={{ marginTop: 14 }}>
+            <UnifiedQueueDiagram />
+          </div>
+        </div>
+      </div>
+      <WhatsAppMockService state={state} dispatch={dispatch} />
+    </div>
+    </DealerPortalFrame>
+  );
+}
+
+function StatBox({ label, value, accent }) {
+  return (
+    <Card style={{ textAlign: "left" }}>
+      <p style={{ margin: "0 0 4px", fontSize: 11, color: C.grey, fontWeight: 600 }}>{label}</p>
+      <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: 22, color: accent || C.navy }}>{value}</p>
+    </Card>
+  );
+}
+
+const ADMIN_STOCK_ALLOCATIONS = [
+  { code: "FPS-102", shop: "Shanti Nagar Fair Price Shop", location: "Ward 12 · Bhopal", period: "September 2026", date: "02 Sep 2026", wheat: 820, rice: 640, pulses: 210, sugar: 96, total: 1766, remaining: 284, status: "Dispatched" },
+  { code: "FPS-118", shop: "Sadar Bazaar Cooperative", location: "Ward 4 · Indore", period: "September 2026", date: "03 Sep 2026", wheat: 760, rice: 590, pulses: 180, sugar: 88, total: 1618, remaining: 412, status: "In transit" },
+  { code: "FPS-127", shop: "Nehru Nagar FPS", location: "Ward 9 · Gwalior", period: "September 2026", date: "04 Sep 2026", wheat: 690, rice: 540, pulses: 160, sugar: 72, total: 1462, remaining: 538, status: "Pending receipt" },
+  { code: "FPS-141", shop: "Lake View Distribution Centre", location: "Ward 16 · Jabalpur", period: "September 2026", date: "05 Sep 2026", wheat: 910, rice: 720, pulses: 240, sugar: 110, total: 1980, remaining: 120, status: "Dispatched" },
+];
+
+function AdminStockAllocation() {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("All");
+  const filtered = ADMIN_STOCK_ALLOCATIONS.filter((item) => {
+    const haystack = `${item.code} ${item.shop} ${item.location}`.toLowerCase();
+    return haystack.includes(query.trim().toLowerCase()) && (status === "All" || item.status === status);
+  });
+  const totals = ADMIN_STOCK_ALLOCATIONS.reduce((sum, item) => ({
+    allocated: sum.allocated + item.total,
+    remaining: sum.remaining + item.remaining,
+    wheat: sum.wheat + item.wheat,
+    rice: sum.rice + item.rice,
+    pulses: sum.pulses + item.pulses,
+    sugar: sum.sugar + item.sugar,
+  }), { allocated: 0, remaining: 0, wheat: 0, rice: 0, pulses: 0, sugar: 0 });
+
+  return (
+    <section aria-labelledby="stock-allocation-title" style={{ marginTop: 22 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+        <div>
+          <span className="rs-portal-breadcrumb">SUPPLY CHAIN · DEMO DATA</span>
+          <h2 id="stock-allocation-title" style={{ margin: "5px 0 3px", color: C.navy, fontFamily: "Poppins, sans-serif", fontSize: 18 }}>Stock allocation overview</h2>
+          <p style={{ margin: 0, color: C.grey, fontSize: 11.5 }}>Mock quantities sent to each dealer and fair price shop.</p>
+        </div>
+        <span className="rs-demo-badge">DEMO / MOCK</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8, marginBottom: 12 }}>
+        <StatBox label="Total allocated (kg)" value={totals.allocated.toLocaleString()} accent={C.navy} />
+        <StatBox label="Remaining (kg)" value={totals.remaining.toLocaleString()} accent={C.gold} />
+        <StatBox label="Wheat (kg)" value={totals.wheat.toLocaleString()} accent={C.infoText} />
+        <StatBox label="Rice (kg)" value={totals.rice.toLocaleString()} accent={C.green} />
+      </div>
+      <Card style={{ padding: 0, overflow: "hidden" }}>
+        <div style={{ display: "flex", gap: 8, padding: 12, borderBottom: `1px solid ${C.greyLine}`, flexWrap: "wrap" }}>
+          <label style={{ flex: "1 1 220px", color: C.grey, fontSize: 10.5, fontWeight: 700 }}>
+            Search shop, code or location
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. FPS-102 or Shanti Nagar" aria-label="Search stock allocations" className="rs-auth-input" style={{ marginTop: 5, padding: "8px 10px", fontSize: 12 }} />
+          </label>
+          <label style={{ flex: "0 1 170px", color: C.grey, fontSize: 10.5, fontWeight: 700 }}>
+            Filter by status
+            <select value={status} onChange={(event) => setStatus(event.target.value)} aria-label="Filter stock allocations by status" className="rs-auth-input" style={{ marginTop: 5, padding: "8px 10px", fontSize: 12 }}>
+              <option>All</option><option>Dispatched</option><option>In transit</option><option>Pending receipt</option>
+            </select>
+          </label>
+        </div>
+        <div className="rs-table-scroll">
+          <table className="rs-allocation-table" style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
+            <caption style={{ textAlign: "left", padding: "10px 12px", color: C.grey, fontSize: 10.5 }}>September 2026 allocation register · {filtered.length} of {ADMIN_STOCK_ALLOCATIONS.length} shops shown</caption>
+            <thead><tr>{["Dealer / shop", "Destination", "Allocation period", "Wheat kg", "Rice kg", "Pulses kg", "Sugar kg", "Total / remaining", "Status"].map((heading) => <th key={heading}>{heading}</th>)}</tr></thead>
+            <tbody>
+              {filtered.map((item) => (
+                <tr key={item.code}>
+                  <td><b>{item.code}</b><small>{item.shop}</small></td><td>{item.location}</td><td>{item.period}<small>Sent {item.date}</small></td>
+                  <td>{item.wheat}</td><td>{item.rice}</td><td>{item.pulses}</td><td>{item.sugar}</td>
+                  <td><b>{item.total} kg</b><small>{item.remaining} kg remaining</small></td>
+                  <td><span className="rs-wa-status" style={{ background: item.status === "Dispatched" ? C.greenBg : C.goldBg, color: item.status === "Dispatched" ? C.green : C.warningText }}>{item.status}</span></td>
+                </tr>
+              ))}
+              {!filtered.length && <tr><td colSpan="9" style={{ padding: 18, color: C.grey, textAlign: "center" }}>No allocation records match the current filters.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </section>
+  );
+}
+
+/* =========================================================================
+   ADMIN DASHBOARD (secondary, kept concise)
+   ========================================================================= */
+function AdminDashboard({ state, dispatch, onLogout }) {
+  const { t } = useT();
+  const noShows = state.queue.filter((q) => q.status === "noshow").length;
+  return (
+    <OperationsPortalFrame onLogout={onLogout} portal="admin">
+    <div className="rs-dashboard-content" style={{ maxWidth: 1120, margin: "0 auto", width: "100%" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <Logo size={34} />
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <p style={{ margin: 0, fontWeight: 700, color: C.navy, fontSize: 14 }}>{t(dict.adminPortal)}</p>
+          <Btn variant="outline" size="sm" icon={LogOut} onClick={onLogout}>Log out</Btn>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px,1fr))", gap: 10, marginBottom: 22 }}>
+        <StatBox label={t(dict.totalTokens)} value={state.totalToday} />
+        <StatBox label={t(dict.completed)} value={state.completedCount} accent={C.green} />
+        <StatBox label={t(dict.avgWait)} value={`${state.avgWaitMin} ${t(dict.min)}`} />
+        <StatBox label={t(dict.noShows)} value={noShows} accent={C.red} />
+      </div>
+
+      <p style={{ fontSize: 12, fontWeight: 700, color: C.grey, letterSpacing: 0.4, margin: "0 0 10px" }}>
+        {t(dict.aiPrediction)} <Sparkles size={12} style={{ verticalAlign: -1 }} />
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: 12 }}>
+        <InsightCard icon={TrendingUp} color={C.green} title={t(dict.aiPrediction)} body={lang => lang === "hi" ? "अनुमानित औसत प्रतीक्षा: 15–20 मिनट" : "Expected average wait: 15–20 min"} />
+        <InsightCard icon={AlertTriangle} color={C.gold} title={t(dict.aiAnomaly)} body={lang => lang === "hi" ? "FPS-102 पर असामान्य वितरण पैटर्न पाया गया" : "Unusual distribution pattern detected at FPS-102"} />
+        <InsightCard icon={BarChart3} color={C.navy} title={t(dict.aiDemand)} body={lang => lang === "hi" ? "कल की अनुमानित मांग: उच्च" : "Expected demand tomorrow: High"} />
+      </div>
+
+      <div style={{ marginTop: 18, background: C.cream, borderRadius: 14, padding: 14, display: "flex", gap: 10 }}>
+        <Info size={16} color={C.grey} style={{ flexShrink: 0, marginTop: 1 }} />
+        <p style={{ fontSize: 12, color: C.grey, margin: 0, lineHeight: 1.5 }}>
+          {t(dict.disclaimerShort)} {" "}
+          {t({ hi: "AI अंतर्दृष्टियाँ इस डेमो में सिम्युलेटेड हैं, वास्तविक प्रशिक्षित मॉडल से नहीं।", en: "AI insights in this demo are simulated, not from a real trained model." })}
+        </p>
+      </div>
+      <AdminStockAllocation />
+      <WhatsAppMockService state={state} dispatch={dispatch} />
+    </div>
+    </OperationsPortalFrame>
+  );
+}
+
+function InsightCard({ icon: Icon, color, title, body }) {
+  const { lang } = useT();
+  return (
+    <Card>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <div style={{ width: 30, height: 30, borderRadius: 9, background: color === C.green ? C.greenBg : color === C.gold ? C.goldBg : C.infoBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon size={15} color={color} />
+        </div>
+        <p style={{ margin: 0, fontWeight: 700, fontSize: 12.5, color: C.navy }}>{title}</p>
+      </div>
+      <p style={{ margin: 0, fontSize: 12.5, color: C.grey, lineHeight: 1.4 }}>{body(lang)}</p>
+    </Card>
+  );
+}
+
+function WhatsAppMockService({ state, dispatch }) {
+  const [selectedId, setSelectedId] = useState(MOCK_WHATSAPP_CONTACTS[0].id);
+  const [message, setMessage] = useState("");
+  const [template, setTemplate] = useState("");
+  const [persistenceError, setPersistenceError] = useState("");
+  const selected = MOCK_WHATSAPP_CONTACTS.find((contact) => contact.id === selectedId);
+  const activity = state.whatsappMessages || [];
+  const templates = {
+    queue: `Your token ${selected.token} is confirmed. We will notify you when your turn is approaching.`,
+    reminder: "Reminder: please carry your ration card and visit during the assigned distribution window.",
+    complete: `Distribution for token ${selected.token} has been recorded. Thank you.`,
+  };
+
+  const send = async () => {
+    const nextMessage = message.trim();
+    if (!selected || !nextMessage) return;
+    const sentAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const nextRecord = { id: `wa-${Date.now()}`, contactId: selected.id, contact: selected.name, number: selected.number, message: nextMessage, status: "sent", sentAt };
+    dispatch({ type: "SEND_WHATSAPP", message: nextRecord });
+    setPersistenceError("");
+    setMessage("");
+    setTemplate("");
+    try {
+      await saveWhatsAppMessage(nextRecord);
+    } catch (error) {
+      setPersistenceError(isSupabaseConfigured ? "Supabase persistence is unavailable; the message remains in demo state." : "Demo mode active; message is stored locally.");
+    }
+  };
+
+  return (
+    <section className="rs-wa-module" aria-label="WhatsApp demo service">
+      <div className="rs-wa-heading">
+        <div><span className="rs-portal-breadcrumb">COMMUNICATIONS</span><h2>WhatsApp notifications</h2><p>Mock service for operational demos only. No real messages are sent.</p></div>
+        <span className="rs-demo-badge">DEMO / MOCK</span>
+      </div>
+      <div className="rs-wa-workspace">
+        <div className="rs-wa-contacts">
+          <div className="rs-wa-panel-title"><b>Sample contacts</b><span>{MOCK_WHATSAPP_CONTACTS.length} contacts</span></div>
+          <div className="rs-wa-contact-list">
+            {MOCK_WHATSAPP_CONTACTS.map((contact) => (
+              <button key={contact.id} className={selectedId === contact.id ? "is-selected" : ""} aria-pressed={selectedId === contact.id} onClick={() => setSelectedId(contact.id)} type="button">
+                <span className="rs-wa-avatar">{contact.name.charAt(0)}</span><span><b>{contact.name}</b><small>{contact.number}</small></span><em>{contact.token}</em>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="rs-wa-composer">
+          <div className="rs-wa-panel-title"><b>Compose notification</b><span>Selected: {selected.name}</span></div>
+          <label>Quick message template
+            <select value={template} onChange={(event) => { setTemplate(event.target.value); setMessage(templates[event.target.value] || ""); }}>
+              <option value="">Select a template</option><option value="queue">Queue update</option><option value="reminder">Visit reminder</option><option value="complete">Distribution complete</option>
+            </select>
+          </label>
+          <label>Message
+            <textarea value={message} onChange={(event) => setMessage(event.target.value)} maxLength={240} rows={5} placeholder="Type a demo notification..." />
+          </label>
+          <div className="rs-wa-compose-footer"><span>{message.length}/240 characters · {selected.number}</span><button type="button" onClick={send} disabled={!message.trim()}><Phone size={15} /> Send mock message</button></div>
+          {persistenceError && <p className="rs-wa-persistence-note" role="status">{persistenceError}</p>}
+        </div>
+      </div>
+      <div className="rs-wa-activity">
+        <div className="rs-wa-panel-title"><b>Recent message activity</b><span>Simulation status only</span></div>
+        <div className="rs-table-scroll"><table><thead><tr><th>Contact</th><th>Message</th><th>Status</th><th>Time</th></tr></thead><tbody>{activity.map((item) => <tr key={item.id}><td><b>{item.contact}</b><small>{item.number}</small></td><td>{item.message}</td><td><span className={`rs-wa-status ${item.status.toLowerCase()}`}>{item.status}</span></td><td>{item.sentAt}</td></tr>)}</tbody></table></div>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================================
+   ROOT APP
+   ========================================================================= */
+export default function RationSetuApp() {
+  const [lang, setLang] = useState("hi");
+  const [role, setRole] = useState("beneficiary");
+  const [dealerAuthenticated, setDealerAuthenticated] = useState(false);
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme);
+  const [state, dispatch] = useReducer(reducer, undefined, loadInitialState);
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const t = (entry) => (entry && entry[lang] ? entry[lang] : entry?.en || "");
+
+  return (
+    <LangCtx.Provider value={{ lang, t }}>
+      <style>{`
+        ${FONT_IMPORT}
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-width: 320px; overflow-x: hidden; }
+        img, svg, video { max-width: 100%; }
+        button, input, select, textarea { max-width: 100%; }
+        input:focus { border-color: ${C.navy} !important; }
+        textarea:focus { border-color: ${C.navy} !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: ${C.greyLine}; border-radius: 3px; }
+
+        /* ===== Responsive beneficiary app shell (replaces the old fixed phone-bezel mockup) ===== */
+        .rs-page {
+          --rs-navy: #12304A;
+          --rs-navy-deep: #0B2239;
+          --rs-indigo: #234E70;
+          --rs-bg: #EEF3F7;
+          --rs-surface: #FFFFFF;
+          --rs-surface-muted: #F7F8FA;
+          --rs-text: #1F2D3D;
+          --rs-text-muted: #425466;
+          --rs-border: #CBD5DF;
+          --rs-green: #138A5B;
+          --rs-green-bg: #E8F5EF;
+          --rs-gold: #E87722;
+          --rs-gold-bg: #FFF1E8;
+          --rs-red: #B9404A;
+          --rs-red-bg: #FCEAED;
+          --rs-warning-text: #8A6410;
+          --rs-info-bg: #EAF0FB;
+          --rs-info-text: #2A5CA8;
+          padding: 24px 20px 30px;
+          background: ${C.bg} !important;
+        }
+        .rs-page.rs-theme-dark {
+          color-scheme: dark;
+          --rs-navy: #E6F0F7;
+          --rs-navy-deep: #071827;
+          --rs-indigo: #8DB9D8;
+          --rs-bg: #0E1C29;
+          --rs-surface: #142738;
+          --rs-surface-muted: #1B3448;
+          --rs-text: #F3F7FA;
+          --rs-text-muted: #B8C7D4;
+          --rs-border: #355064;
+          --rs-green: #5BD39B;
+          --rs-green-bg: #123D32;
+          --rs-gold: #FFAA70;
+          --rs-gold-bg: #4B2A1B;
+          --rs-red: #FF8E98;
+          --rs-red-bg: #49272D;
+          --rs-warning-text: #FFD08A;
+          --rs-info-bg: #1D3B55;
+          --rs-info-text: #A9D5F3;
+        }
+        .rs-role-switch { flex-wrap: wrap; }
+
+        .rs-shell {
+          background: ${C.bg};
+          display: flex; flex-direction: column;
+          position: relative; overflow: hidden;
+          width: 100%;
+          min-height: calc(100vh - 132px);
+          border: 1px solid rgba(220,228,236,0.9);
+          box-shadow: 0 14px 40px rgba(23,50,77,0.08);
+        }
+        .rs-shell-main { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+        .rs-shell-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .rs-shell-footer { flex-shrink: 0; }
+        .rs-sidebar { display: none; }
+        .rs-sidebar-brand { padding: 30px 24px 26px; border-bottom: 1px solid rgba(220,228,236,0.8); }
+        .rs-sidebar-brand > div { margin-bottom: 14px; }
+        .rs-sidebar-kicker, .rs-sidebar-label { display: block; color: ${C.grey}; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+        .rs-sidebar-nav { padding: 25px 14px; }
+        .rs-sidebar-label { padding: 0 12px; margin: 0 0 10px; }
+        .rs-sidebar-item { width: 100%; border: 0; background: transparent; color: ${C.grey}; display: flex; align-items: center; gap: 12px; padding: 12px 13px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; margin-bottom: 4px; position: relative; }
+        .rs-sidebar-item:hover { background: ${C.cream}; color: ${C.navy}; }
+        .rs-sidebar-item.is-active { color: ${C.navy}; background: ${C.goldBg}; box-shadow: inset 3px 0 0 ${C.gold}; }
+        .rs-sidebar-dot { width: 7px; height: 7px; border-radius: 50%; background: ${C.gold}; margin-left: auto; }
+        .rs-sidebar-bottom { margin-top: auto; padding: 18px 14px 20px; }
+        .rs-sidebar-help { display: flex; gap: 9px; align-items: flex-start; padding: 12px; border-radius: 10px; background: ${C.cream}; color: ${C.navy}; margin-bottom: 14px; }
+        .rs-sidebar-help div { display: grid; gap: 2px; }
+        .rs-sidebar-help b { font-size: 11px; }
+        .rs-sidebar-help span { color: ${C.grey}; font-size: 10px; }
+        .rs-sidebar-logout { border: 0; background: transparent; color: ${C.grey}; display: flex; align-items: center; gap: 9px; padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .rs-card { transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+        .rs-card:hover { border-color: #C8D5E2 !important; box-shadow: 0 8px 24px rgba(23,50,77,0.08) !important; }
+        .rs-home-hero { margin: 28px 0 20px; padding: 24px 26px; border-radius: 16px; color: ${C.white}; background: ${C.navyDeep}; display: flex; align-items: center; justify-content: space-between; gap: 20px; position: relative; overflow: hidden; }
+        .rs-home-hero:after { content: ""; position: absolute; width: 220px; height: 220px; border-radius: 50%; right: -70px; top: -100px; background: rgba(232,119,34,.18); }
+        .rs-home-hero h1 { margin: 7px 0 5px; font-family: Poppins, sans-serif; font-size: clamp(21px, 3vw, 28px); line-height: 1.2; letter-spacing: -.02em; }
+        .rs-home-hero p { margin: 0; font-size: 12px; color: rgba(255,255,255,.7); }
+        .rs-eyebrow { color: #FFB27A; font-size: 9.5px; font-weight: 800; letter-spacing: .13em; }
+        .rs-hero-mark { width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #FFB27A; position: relative; z-index: 1; flex: 0 0 auto; }
+        .rs-public-home { min-height: 640px; background: #F8FAFC; color: ${C.navy}; }
+        .rs-public-header { min-height: 78px; display: flex; align-items: center; gap: 28px; justify-content: space-between; padding: 0 34px; background: ${C.white}; border-bottom: 1px solid ${C.greyLine}; }
+        .rs-public-brand { display: flex; align-items: center; gap: 10px; min-width: 220px; }
+        .rs-public-brand img { width: 36px; height: 36px; object-fit: contain; }
+        .rs-public-brand strong { display: block; font-family: Poppins, sans-serif; font-size: 17px; letter-spacing: -.03em; }
+        .rs-public-brand strong span { color: ${C.green}; }
+        .rs-public-brand small { display: block; color: ${C.grey}; font-size: 8px; letter-spacing: .12em; font-weight: 800; margin-top: 2px; }
+        .rs-public-nav { display: flex; gap: 28px; margin-right: auto; }
+        .rs-public-nav a { color: ${C.grey}; text-decoration: none; font-size: 12px; font-weight: 700; }
+        .rs-public-nav a:hover { color: ${C.navy}; }
+        .rs-public-actions { display: flex; align-items: center; gap: 8px; }
+        .rs-public-actions button { border: 0; background: transparent; color: ${C.grey}; font-size: 11px; font-weight: 700; padding: 8px; cursor: pointer; }
+        .rs-public-actions .rs-public-login { display: inline-flex; align-items: center; gap: 7px; color: ${C.white}; background: ${C.navy}; border-radius: 7px; padding: 10px 14px; }
+        .rs-public-hero { max-width: 1050px; margin: 0 auto; padding: 68px 34px 56px; display: grid; grid-template-columns: 1.2fr .8fr; gap: 50px; align-items: center; }
+        .rs-public-kicker { display: block; color: ${C.green}; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+        .rs-public-hero h1 { margin: 13px 0 14px; font-family: Poppins, sans-serif; font-size: clamp(30px, 5vw, 48px); line-height: 1.1; letter-spacing: -.04em; color: ${C.navyDeep}; }
+        .rs-public-hero h1 em { color: ${C.gold}; font-style: normal; }
+        .rs-public-hero-copy > p { max-width: 500px; color: ${C.grey}; line-height: 1.7; font-size: 14px; margin: 0 0 24px; }
+        .rs-public-hero-actions { display: flex; align-items: center; gap: 20px; }
+        .rs-text-action { border: 0; background: transparent; color: ${C.navy}; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
+        .rs-public-hero-panel { background: ${C.navy}; color: ${C.white}; border-radius: 14px; padding: 22px; box-shadow: 0 18px 34px rgba(11,34,57,.18); }
+        .rs-public-panel-top, .rs-public-stat, .rs-public-panel-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .rs-public-panel-top { padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,.14); color: #C9D5E4; font-size: 11px; font-weight: 700; }
+        .rs-live { color: #A8E0C6; font-size: 10px; display: inline-flex; align-items: center; gap: 5px; }
+        .rs-live i, .rs-status-dot { width: 7px; height: 7px; border-radius: 50%; background: ${C.green}; display: inline-block; }
+        .rs-public-stat { padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,.14); flex-direction: column; align-items: flex-start; gap: 3px; }
+        .rs-public-stat strong { font-family: Poppins, sans-serif; font-size: 24px; }
+        .rs-public-stat span { color: #B8C7D9; font-size: 11px; }
+        .rs-public-panel-footer { justify-content: flex-start; color: #D8E1EC; font-size: 10px; padding-top: 18px; }
+        .rs-public-section { max-width: 1050px; margin: 0 auto; padding: 18px 34px 52px; }
+        .rs-public-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
+        .rs-public-section-heading h2 { font-family: Poppins, sans-serif; margin: 6px 0 0; font-size: 21px; letter-spacing: -.025em; }
+        .rs-section-note { color: ${C.grey}; font-size: 11px; }
+        .rs-public-service-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .rs-public-service-grid button { min-height: 155px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 16px; text-align: left; cursor: pointer; background: ${C.white}; border: 1px solid ${C.greyLine}; border-radius: 10px; padding: 18px; color: ${C.navy}; }
+        .rs-public-service-grid button:hover { border-color: ${C.green}; box-shadow: 0 8px 20px rgba(23,50,77,.08); transform: translateY(-2px); }
+        .rs-public-service-grid button > svg:first-child { color: ${C.green}; }
+        .rs-public-service-grid button > svg:last-child { color: ${C.grey}; align-self: flex-end; }
+        .rs-public-service-grid span { display: grid; gap: 6px; }
+        .rs-public-service-grid b { font-size: 12px; }
+        .rs-public-service-grid small { color: ${C.grey}; font-size: 10.5px; line-height: 1.45; }
+        .rs-public-lower { max-width: 1050px; margin: 0 auto; padding: 0 34px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .rs-public-notice, .rs-public-help { border-radius: 10px; padding: 20px; border: 1px solid ${C.greyLine}; background: ${C.white}; }
+        .rs-public-notice { border-left: 4px solid ${C.gold}; }
+        .rs-public-notice h2 { font-size: 15px; margin: 0; }
+        .rs-notice-badge { color: #A94B0A; background: ${C.goldBg}; padding: 5px 8px; border-radius: 5px; font-size: 10px; font-weight: 800; }
+        .rs-public-notice p, .rs-public-help p { color: ${C.grey}; line-height: 1.55; font-size: 11.5px; margin: 13px 0; }
+        .rs-public-notice button { border: 0; background: none; color: ${C.navy}; padding: 0; font-size: 11px; font-weight: 800; cursor: pointer; }
+        .rs-public-help { display: flex; align-items: center; gap: 13px; }
+        .rs-help-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 9px; background: ${C.cream}; color: ${C.navy}; flex: 0 0 auto; }
+        .rs-public-help h3 { margin: 5px 0 0; font-family: Poppins, sans-serif; font-size: 15px; }
+        .rs-public-help p { margin-bottom: 0; }
+        .rs-public-help > svg { margin-left: auto; color: ${C.grey}; flex: 0 0 auto; }
+        .rs-public-footer { display: flex; justify-content: space-between; gap: 12px; padding: 17px 34px; border-top: 1px solid ${C.greyLine}; color: ${C.grey}; font-size: 10px; }
+        .rs-auth-screen { min-height: 100%; display: grid; place-items: center; padding: 42px 20px; background: ${C.bg}; }
+        .rs-auth-card { width: min(100%, 440px); padding: 30px 32px; border: 1px solid ${C.greyLine}; border-radius: 12px; background: ${C.white}; box-shadow: 0 12px 28px rgba(16,42,67,.08); }
+        .rs-auth-card > img, .rs-auth-card > div:first-child { margin-bottom: 20px; }
+        .rs-auth-heading { margin-bottom: 22px; }
+        .rs-auth-heading > span { color: ${C.gold}; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .rs-auth-heading h2 { margin: 7px 0 5px; color: ${C.navy}; font-family: Poppins, sans-serif; font-size: 21px; letter-spacing: -.02em; }
+        .rs-auth-heading p { margin: 0; color: ${C.grey}; font-size: 12px; line-height: 1.5; }
+        .rs-auth-dealer-heading { text-align: center; }
+        .rs-auth-field { margin: 7px 0 17px; }
+        .rs-auth-input-row, .rs-auth-input { width: 100%; box-sizing: border-box; border: 1px solid ${C.greyLine}; border-radius: 7px; background: ${C.white}; padding: 11px 12px; font: 14px Inter, sans-serif; color: ${C.navy}; }
+        .rs-auth-input-row { display: flex; align-items: center; margin: 7px 0 17px; }
+        .rs-auth-input-row .rs-auth-input { border: 0; padding: 0; }
+        .rs-auth-input:focus { border-color: ${C.navy} !important; box-shadow: 0 0 0 3px rgba(16,42,67,.1); }
+        .rs-auth-code { letter-spacing: .32em; text-align: center; font-size: 18px; }
+        .rs-auth-steps { display: flex; gap: 6px; justify-content: center; margin-top: 22px; }
+        .rs-auth-steps > div { width: 7px; height: 7px; border-radius: 50%; }
+        .rs-beneficiary-picker { display: grid; gap: 6px; margin-top: 12px; }
+        .rs-beneficiary-picker p { margin: 0 0 2px; color: ${C.grey}; font-size: 11px; font-weight: 700; }
+        .rs-beneficiary-picker button { display: flex; justify-content: space-between; gap: 10px; border: 1px solid ${C.greyLine}; border-radius: 8px; padding: 9px 10px; background: ${C.surfaceMuted}; color: ${C.navy}; cursor: pointer; text-align: left; }
+        .rs-beneficiary-picker button:hover, .rs-beneficiary-picker button:focus-visible { border-color: ${C.gold}; outline: 2px solid ${C.goldBg}; }
+        .rs-beneficiary-picker span { color: ${C.grey}; font-size: 10px; }
+        .rs-wa-module { margin-top: 22px; border: 1px solid ${C.greyLine}; border-radius: 12px; background: ${C.white}; overflow: hidden; }
+        .rs-wa-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid ${C.greyLine}; }
+        .rs-wa-heading h2 { margin: 5px 0 4px; font-family: Poppins, sans-serif; color: ${C.navy}; font-size: 19px; }
+        .rs-wa-heading p { margin: 0; color: ${C.grey}; font-size: 11.5px; }
+        .rs-demo-badge { flex: 0 0 auto; color: #A94B0A; background: ${C.goldBg}; border: 1px solid #F3B58C; border-radius: 5px; padding: 5px 8px; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+        .rs-demo-help-toggle { width: 100%; margin: 0 0 12px; padding: 9px 10px; border: 1px solid ${C.greyLine}; border-radius: 7px; background: ${C.surfaceMuted}; color: ${C.indigo}; font-size: 11px; font-weight: 800; cursor: pointer; text-align: left; }
+        .rs-demo-help-toggle:hover, .rs-demo-help-toggle:focus-visible { background: ${C.goldBg}; }
+        .rs-demo-help-panel { display: grid; gap: 7px; margin: 0 0 14px; padding: 10px; border: 1px solid #F3B58C; border-radius: 8px; background: ${C.goldBg}; color: ${C.navy}; }
+        .rs-demo-help-panel > b { color: #A94B0A; font-size: 9px; letter-spacing: .06em; }
+        .rs-demo-help-panel > small { color: ${C.grey}; font-size: 10px; line-height: 1.4; }
+        .rs-demo-help-panel button { display: grid; gap: 3px; width: 100%; padding: 8px; border: 1px solid rgba(169,75,10,.18); border-radius: 6px; background: ${C.white}; color: ${C.navy}; text-align: left; cursor: pointer; }
+        .rs-demo-help-panel button:hover, .rs-demo-help-panel button:focus-visible { border-color: ${C.gold}; }
+        .rs-demo-help-panel button strong { font-size: 10.5px; }
+        .rs-demo-help-panel button span { color: ${C.grey}; font-size: 9.5px; overflow-wrap: anywhere; }
+        .rs-wa-workspace { display: grid; grid-template-columns: minmax(220px, .85fr) 1.15fr; gap: 0; }
+        .rs-wa-contacts { border-right: 1px solid ${C.greyLine}; }
+        .rs-wa-composer { padding: 20px 22px; }
+        .rs-wa-panel-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 18px; color: ${C.navy}; border-bottom: 1px solid ${C.greyLine}; font-size: 12px; }
+        .rs-wa-panel-title span { color: ${C.grey}; font-size: 10px; font-weight: 500; }
+        .rs-wa-contact-list { max-height: 332px; overflow-y: auto; padding: 7px; }
+        .rs-wa-contact-list button { width: 100%; display: flex; align-items: center; gap: 9px; border: 0; border-radius: 7px; padding: 9px; background: transparent; text-align: left; cursor: pointer; color: ${C.navy}; }
+        .rs-wa-contact-list button:hover { background: ${C.cream}; }
+        .rs-wa-contact-list button.is-selected { background: ${C.goldBg}; box-shadow: inset 4px 0 0 ${C.gold}; }
+        .rs-wa-contact-list button:focus-visible { outline: 2px solid ${C.gold}; outline-offset: -2px; }
+        .rs-wa-contact-list button > span:nth-child(2) { min-width: 0; flex: 1; display: grid; gap: 2px; }
+        .rs-wa-contact-list b { font-size: 11.5px; }
+        .rs-wa-contact-list small, .rs-wa-activity td small { color: ${C.grey}; font-size: 9.5px; }
+        .rs-wa-contact-list em { color: ${C.grey}; font-size: 10px; font-style: normal; font-weight: 800; }
+        .rs-wa-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: ${C.navy}; color: ${C.white}; font-size: 11px; font-weight: 800; }
+        .rs-wa-composer .rs-wa-panel-title { padding: 0 0 14px; margin-bottom: 16px; }
+        .rs-wa-composer label { display: grid; gap: 6px; color: ${C.grey}; font-size: 10.5px; font-weight: 700; margin-bottom: 14px; }
+        .rs-wa-composer select, .rs-wa-composer textarea { width: 100%; box-sizing: border-box; border: 1px solid ${C.greyLine}; border-radius: 7px; padding: 10px; background: ${C.white}; color: ${C.navy}; font-size: 12px; resize: vertical; }
+        .rs-wa-composer select:focus, .rs-wa-composer textarea:focus { outline: 2px solid rgba(217,154,43,.25); border-color: ${C.gold}; }
+        .rs-wa-compose-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: ${C.grey}; font-size: 10px; }
+        .rs-wa-compose-footer button { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 7px; background: ${C.navy}; color: ${C.white}; padding: 10px 13px; cursor: pointer; font-size: 10.5px; font-weight: 800; }
+        .rs-wa-compose-footer button:disabled { opacity: .45; cursor: not-allowed; }
+        .rs-wa-persistence-note { margin: 10px 0 0; color: #A94B0A; font-size: 10px; }
+        .rs-wa-activity { border-top: 1px solid ${C.greyLine}; }
+        .rs-wa-activity table { width: 100%; border-collapse: collapse; min-width: 540px; }
+        .rs-wa-activity th { background: #F5F7FA; color: ${C.grey}; font-size: 10px; text-align: left; padding: 10px 18px; }
+        .rs-wa-activity td { color: ${C.navy}; font-size: 10.5px; padding: 11px 18px; border-top: 1px solid ${C.greyLine}; vertical-align: top; }
+        .rs-wa-activity td:first-child { display: grid; gap: 2px; }
+        .rs-wa-status { display: inline-block; border-radius: 99px; padding: 4px 7px; font-size: 9px; font-weight: 800; }
+        .rs-wa-status.sent, .rs-wa-status.delivered { background: ${C.greenBg}; color: #0B6844; }
+        .rs-wa-status.queued { background: ${C.goldBg}; color: #A94B0A; }
+        .rs-allocation-table th { background: ${C.surfaceMuted}; color: ${C.grey}; font-size: 9.5px; text-align: left; padding: 10px 12px; white-space: nowrap; }
+        .rs-allocation-table td { color: ${C.navy}; font-size: 10.5px; padding: 10px 12px; border-top: 1px solid ${C.greyLine}; vertical-align: top; }
+        .rs-allocation-table td:first-child, .rs-allocation-table td:nth-child(3), .rs-allocation-table td:nth-child(8) { display: grid; gap: 2px; }
+        .rs-allocation-table small { color: ${C.grey}; font-size: 9px; font-weight: 500; }
+
+        /* Desktop uses the same product shell as a real operations dashboard. */
+        @media (min-width: 640px) {
+          .rs-shell {
+            width: min(100%, 1080px);
+            margin: 0 auto;
+            border-radius: 20px;
+            min-height: 640px;
+            max-height: none;
+          }
+          .rs-shell.has-sidebar { flex-direction: row; }
+          .rs-shell.has-sidebar .rs-sidebar { width: 218px; flex: 0 0 218px; display: flex; flex-direction: column; background: ${C.white}; border-right: 1px solid ${C.greyLine}; }
+          .rs-shell.has-sidebar .rs-shell-main { min-height: 640px; }
+          .rs-shell.has-sidebar .rs-shell-scroll { padding: 0 6px; }
+          .rs-shell.has-sidebar .rs-shell-footer { display: none; }
+        }
+        @media (min-width: 1024px) {
+          .rs-shell {
+            width: min(100%, 1080px);
+          }
+        }
+
+        /* Dealer/Admin dashboards: keep tables from breaking layout on narrow screens */
+        .rs-table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Dealer dashboard: single column on phones/tablets, two columns on wide screens */
+        .rs-dealer-grid { grid-template-columns: 1fr; }
+        @media (min-width: 900px) {
+          .rs-dealer-grid { grid-template-columns: 1.4fr 1fr; }
+        }
+
+        @media (max-width: 640px) {
+          .rs-page { padding: 12px 8px 20px; }
+          .rs-shell { box-shadow: 0 6px 20px rgba(23,50,77,0.06); }
+          .rs-public-header { padding: 14px 18px; min-height: 68px; }
+          .rs-public-nav { display: none; }
+          .rs-public-brand { min-width: 0; }
+          .rs-public-actions button:not(.rs-public-login) { display: none; }
+          .rs-public-actions .rs-public-login { padding: 9px 10px; font-size: 10px; }
+          .rs-public-hero { display: block; padding: 42px 20px 30px; }
+          .rs-public-hero h1 { font-size: 32px; }
+          .rs-public-hero-panel { margin-top: 30px; }
+          .rs-public-section, .rs-public-lower { padding-left: 20px; padding-right: 20px; }
+          .rs-public-service-grid { grid-template-columns: 1fr 1fr; }
+          .rs-public-service-grid button { min-height: 145px; padding: 14px; }
+          .rs-public-lower { grid-template-columns: 1fr; }
+          .rs-public-footer { padding: 16px 20px; display: grid; }
+          .rs-wa-heading { padding: 18px; }
+          .rs-wa-workspace { grid-template-columns: 1fr; }
+          .rs-wa-contacts { border-right: 0; border-bottom: 1px solid ${C.greyLine}; }
+          .rs-wa-contact-list { display: flex; overflow-x: auto; max-height: none; gap: 6px; }
+          .rs-wa-contact-list button { min-width: 150px; }
+          .rs-wa-composer { padding: 18px; }
+          .rs-wa-compose-footer { align-items: flex-end; flex-direction: column; }
+          .rs-global-header { gap: 10px; }
+          .rs-global-utility { gap: 6px; min-width: 0; }
+          .rs-global-brand { min-width: 0; }
+          .rs-global-brand > div { min-width: 0; }
+          .rs-global-brand p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .rs-role-switch { flex-shrink: 0; }
+          .rs-auth-screen { padding: 24px 12px; }
+          .rs-auth-card { padding: 24px 20px; }
+          .rs-public-section-heading { align-items: flex-start; flex-direction: column; }
+          .rs-public-service-grid { gap: 8px; }
+          .rs-public-service-grid button { min-height: 138px; }
+          .rs-notification-popover { position: fixed; top: 74px; right: 12px; }
+          .rs-portal-header-actions, .rs-ops-header-actions { gap: 8px; }
+          .rs-ops-header { flex-wrap: wrap; }
+          .rs-ops-header-title { min-width: 0; }
+          .rs-ops-header-actions { margin-left: auto; }
+          .rs-ops-subnav { overflow-x: auto; white-space: nowrap; }
+          .rs-dashboard-content, .rs-ops-content { min-width: 0; }
+          .rs-table-scroll { max-width: 100%; }
+          .rs-table-scroll table { min-width: 520px; }
+          .rs-wa-heading { flex-wrap: wrap; }
+          .rs-wa-heading > div { min-width: 0; }
+          .rs-wa-heading p { line-height: 1.4; }
+          .rs-wa-contact-list button { min-height: 44px; }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) {
+          .rs-page { padding: 14px 14px 24px; }
+          .rs-global-header { padding-left: 14px; padding-right: 14px; }
+          .rs-global-status { display: none; }
+          .rs-public-hero { gap: 28px; padding-left: 24px; padding-right: 24px; }
+          .rs-public-section, .rs-public-lower { padding-left: 24px; padding-right: 24px; }
+          .rs-public-service-grid { grid-template-columns: repeat(2, 1fr); }
+          .rs-shell.has-sidebar .rs-sidebar { width: 196px; flex-basis: 196px; }
+          .rs-shell.has-sidebar .rs-shell-scroll > div > div:first-child { padding-left: 24px !important; padding-right: 24px !important; }
+          .rs-wa-workspace { grid-template-columns: minmax(190px, .75fr) 1.25fr; }
+          .rs-wa-composer { padding: 18px; }
+          .rs-ops-sidebar { width: 204px; flex-basis: 204px; }
+          .rs-ops-header, .rs-ops-content { padding-left: 20px; padding-right: 20px; }
+        }
+        @media (min-width: 640px) {
+          .rs-shell.has-sidebar .rs-shell-scroll > div { max-width: 100% !important; }
+          .rs-shell.has-sidebar .rs-shell-scroll > div > div:first-child { padding-left: 36px !important; padding-right: 36px !important; }
+        }
+
+        button { font-family: Inter, 'Noto Sans Devanagari', sans-serif; }
+        button:focus-visible, input:focus-visible, textarea:focus-visible {
+          outline: 3px solid color-mix(in srgb, ${C.gold} 45%, transparent);
+          outline-offset: 2px;
+        }
+
+        /* ===== Government portal presentation ===== */
+        .rs-page {
+          padding: 18px 28px 28px;
+          background: ${C.bg} !important;
+        }
+        .rs-global-header {
+          width: min(100%, 1280px);
+          min-height: 66px;
+          margin: 0 auto 18px;
+          padding: 10px 16px 10px 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          background: ${C.white};
+          border: 1px solid ${C.greyLine};
+          border-radius: 12px;
+          box-shadow: 0 4px 18px rgba(24,43,82,.05);
+        }
+        .rs-global-brand { display: flex; align-items: center; gap: 10px; color: ${C.navy}; }
+        .rs-global-brand p:first-child { letter-spacing: -.02em; }
+        .rs-global-utility { display: flex; align-items: center; gap: 18px; }
+        .rs-theme-toggle {
+          display: inline-flex; align-items: center; gap: 6px; border: 1px solid ${C.greyLine};
+          border-radius: 7px; padding: 7px 9px; background: ${C.white}; color: ${C.navy};
+          cursor: pointer; font: 700 10px Inter, sans-serif;
+        }
+        .rs-theme-toggle:hover { background: ${C.cream}; }
+        .rs-global-status, .rs-service-status {
+          display: inline-flex; align-items: center; gap: 7px;
+          color: ${C.grey}; font-size: 11px; font-weight: 700; white-space: nowrap;
+        }
+        .rs-status-dot { width: 7px; height: 7px; border-radius: 50%; background: ${C.green}; box-shadow: 0 0 0 3px ${C.greenBg}; display: inline-block; }
+        .rs-role-switch {
+          display: flex; gap: 3px; padding: 4px; border: 1px solid ${C.greyLine};
+          border-radius: 10px; background: ${C.cream};
+        }
+        .rs-role-switch button { padding: 8px 12px !important; border-radius: 7px !important; font-size: 11.5px !important; }
+        .rs-shell {
+          width: min(100%, 1280px);
+          margin: 0 auto;
+          min-height: calc(100vh - 136px);
+          background: ${C.white};
+          border: 1px solid ${C.greyLine};
+          border-radius: 14px;
+          box-shadow: 0 12px 32px rgba(24,43,82,.08);
+        }
+        .rs-shell.has-sidebar { flex-direction: row; }
+        .rs-sidebar { background: ${C.white}; border-right: 1px solid ${C.greyLine}; }
+        .rs-sidebar-brand { padding: 25px 20px 22px; background: ${C.navyDeep}; border-bottom: 0; }
+        .rs-sidebar-brand > div { margin-bottom: 12px; }
+        .rs-sidebar-brand > div span { color: ${C.white} !important; }
+        .rs-sidebar-kicker, .rs-sidebar-label { color: #8492aa; }
+        .rs-sidebar-nav { padding: 24px 12px; }
+        .rs-sidebar-item { color: #65738b; border-radius: 8px; padding: 11px 12px; font-size: 12px; }
+        .rs-sidebar-item:hover { background: #edf1f8; color: ${C.navy}; }
+        .rs-sidebar-item.is-active { color: ${C.navy}; background: ${C.goldBg}; box-shadow: inset 3px 0 0 ${C.gold}; }
+        .rs-sidebar-help { background: ${C.cream}; color: ${C.navy}; }
+        .rs-portal-header {
+          min-height: 68px; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;
+          gap: 16px; background: ${C.navyDeep}; color: ${C.white};
+        }
+        .rs-portal-header-title { display: grid; gap: 4px; }
+        .rs-portal-header-title strong { font-size: 15px; letter-spacing: -.01em; }
+        .rs-portal-breadcrumb { color: #aebcda; font-size: 9px; font-weight: 800; letter-spacing: .13em; }
+        .rs-portal-header-actions, .rs-ops-header-actions { display: flex; align-items: center; gap: 16px; }
+        .rs-portal-header .rs-service-status { color: #c6d2e8; }
+        .rs-header-icon { width: 31px; height: 31px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.18); border-radius: 7px; background: rgba(255,255,255,.08); color: #fff; cursor: pointer; }
+        .rs-notification-control { position: relative; }
+        .rs-notification-count { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; display: grid; place-items: center; border-radius: 99px; background: ${C.gold}; color: ${C.navyDeep}; font-size: 9px; font-weight: 800; border: 2px solid ${C.navyDeep}; }
+        .rs-notification-backdrop { position: fixed; inset: 0; z-index: 20; border: 0; background: transparent; cursor: default; }
+        .rs-notification-popover { position: absolute; z-index: 21; top: 42px; right: 0; width: min(360px, calc(100vw - 32px)); overflow: hidden; border: 1px solid ${C.greyLine}; border-radius: 10px; background: ${C.white}; color: ${C.navy}; box-shadow: 0 16px 32px rgba(7,24,39,.24); }
+        .rs-notification-popover-head, .rs-notification-popover-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; }
+        .rs-notification-popover-head { border-bottom: 1px solid ${C.greyLine}; font-size: 12px; }
+        .rs-notification-popover-head span { color: ${C.grey}; font-size: 10px; }
+        .rs-notification-popover-actions { justify-content: flex-start; background: ${C.surfaceMuted}; }
+        .rs-notification-popover-actions button, .rs-notification-view-all { border: 0; background: transparent; color: ${C.indigo}; cursor: pointer; font-size: 10px; font-weight: 800; padding: 0; }
+        .rs-notification-list { max-height: 300px; overflow-y: auto; }
+        .rs-notification-item { width: 100%; display: flex; gap: 9px; align-items: flex-start; border: 0; border-bottom: 1px solid ${C.greyLine}; background: ${C.white}; color: ${C.navy}; text-align: left; padding: 11px 14px; cursor: pointer; }
+        .rs-notification-item:hover, .rs-notification-item:focus-visible { background: ${C.goldBg}; outline: none; }
+        .rs-notification-item.is-read { opacity: .62; }
+        .rs-notification-item-icon { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 auto; border-radius: 7px; background: ${C.goldBg}; color: ${C.gold}; }
+        .rs-notification-item > span:last-child { min-width: 0; display: grid; gap: 3px; }
+        .rs-notification-item b { font-size: 10.5px; }
+        .rs-notification-item small { color: ${C.grey}; font-size: 10px; line-height: 1.35; }
+        .rs-notification-item em { color: ${C.grey}; font-size: 9px; font-style: normal; }
+        .rs-notification-empty { color: ${C.grey}; font-size: 11px; text-align: center; padding: 20px; }
+        .rs-notification-view-all { width: 100%; padding: 11px 14px; border-top: 1px solid ${C.greyLine}; text-align: left; }
+        .rs-header-user { display: inline-flex; align-items: center; gap: 8px; color: #e7edf8; font-size: 11px; font-weight: 700; }
+        .rs-avatar { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: ${C.navyDeep}; background: ${C.gold}; font-size: 11px; font-weight: 800; }
+        .rs-service-nav { min-height: 42px; display: flex; align-items: center; gap: 22px; padding: 0 28px; border-bottom: 1px solid ${C.greyLine}; background: ${C.white}; }
+        .rs-service-nav-label { color: ${C.navy}; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-right: 8px; }
+        .rs-service-nav button { height: 42px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: ${C.grey}; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .rs-service-nav button.is-current { color: ${C.navy}; border-bottom-color: ${C.gold}; }
+        .rs-shell-scroll { background: ${C.bg}; }
+        .rs-shell.has-sidebar .rs-shell-scroll { padding: 0; }
+        .rs-home-hero { margin-top: 20px; border-radius: 11px; background: ${C.navyDeep}; }
+        .rs-card { border-radius: 11px !important; box-shadow: 0 2px 8px rgba(24,43,82,.04) !important; }
+        .rs-card:hover { box-shadow: 0 8px 22px rgba(24,43,82,.09) !important; }
+
+        /* Dealer console */
+        .rs-ops-shell { width: min(100%, 1280px); min-height: calc(100vh - 136px); display: flex; overflow: hidden; background: ${C.bg}; border: 1px solid ${C.greyLine}; border-radius: 14px; box-shadow: 0 12px 32px rgba(24,43,82,.08); }
+        .rs-ops-sidebar { width: 236px; flex: 0 0 236px; display: flex; flex-direction: column; background: ${C.navyDeep}; color: #dbe4f5; }
+        .rs-ops-brand { padding: 25px 20px 21px; border-bottom: 1px solid rgba(255,255,255,.12); }
+        .rs-ops-brand > div { margin-bottom: 12px; }
+        .rs-ops-brand > div span { color: ${C.white} !important; }
+        .rs-ops-brand > span { color: #8d9cbb; font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+        .rs-ops-location { margin: 18px 16px 4px; padding: 10px 11px; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; color: #f5f7fb; font-size: 12px; font-weight: 800; }
+        .rs-ops-location small { display: block; margin: 3px 0 0 14px; color: #91a1bf; font-size: 10px; font-weight: 500; }
+        .rs-ops-nav { padding: 20px 12px; }
+        .rs-ops-nav p { margin: 0 12px 9px; color: #8292b2; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .rs-ops-nav button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; margin-bottom: 3px; border: 0; border-radius: 8px; background: transparent; color: #aebbd2; text-align: left; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .rs-ops-nav button:hover, .rs-ops-nav button.is-active { background: rgba(255,255,255,.1); color: #fff; }
+        .rs-ops-nav button.is-active { box-shadow: inset 3px 0 0 ${C.gold}; }
+        .rs-ops-bottom { margin-top: auto; padding: 17px 14px 20px; }
+        .rs-ops-security { display: flex; gap: 8px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,.07); color: #d8e1f1; }
+        .rs-ops-security span { display: grid; gap: 2px; }
+        .rs-ops-security b { font-size: 10px; } .rs-ops-security small { color: #91a1bf; font-size: 9px; }
+        .rs-ops-bottom > button { display: flex; align-items: center; gap: 8px; margin-top: 13px; padding: 7px 8px; border: 0; background: transparent; color: #9baac5; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .rs-ops-main { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+        .rs-ops-header { min-height: 82px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 16px 28px; background: ${C.white}; border-bottom: 1px solid ${C.greyLine}; }
+        .rs-ops-header h1 { margin: 5px 0 0; color: ${C.navy}; font-family: Poppins, sans-serif; font-size: 22px; letter-spacing: -.02em; }
+        .rs-ops-header .rs-header-icon { border-color: ${C.greyLine}; background: ${C.bg}; color: ${C.navy}; }
+        .rs-ops-header .rs-header-user { color: ${C.navy}; }
+        .rs-subnav-divider { width: 1px; height: 14px; background: ${C.greyLine}; }
+        .rs-ops-subnav { display: flex; align-items: center; gap: 12px; padding: 10px 28px; color: ${C.grey}; font-size: 10px; font-weight: 600; background: ${C.surfaceMuted}; border-bottom: 1px solid ${C.greyLine}; }
+        .rs-subnav-spacer { flex: 1; }
+        .rs-ops-subnav button { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; color: ${C.indigo}; border: 1px solid ${C.greyLine}; border-radius: 6px; background: ${C.white}; font-size: 10px; font-weight: 700; cursor: pointer; }
+        .rs-theme-dark .rs-public-home,
+        .rs-theme-dark .rs-shell-scroll,
+        .rs-theme-dark .rs-ops-shell { background: ${C.bg} !important; }
+        .rs-theme-dark .rs-public-service-grid button,
+        .rs-theme-dark .rs-public-notice,
+        .rs-theme-dark .rs-public-help,
+        .rs-theme-dark .rs-auth-card,
+        .rs-theme-dark .rs-wa-module,
+        .rs-theme-dark .rs-shell,
+        .rs-theme-dark .rs-ops-header,
+        .rs-theme-dark .rs-dashboard-content .rs-card { background: ${C.white} !important; }
+        .rs-theme-dark .rs-wa-activity th { background: ${C.surfaceMuted} !important; }
+        .rs-theme-dark .rs-demo-help-toggle { background: ${C.surfaceMuted}; color: ${C.indigo}; }
+        .rs-theme-dark .rs-demo-help-panel button { background: ${C.white}; color: ${C.navy}; }
+        .rs-theme-dark .rs-sidebar-kicker,
+        .rs-theme-dark .rs-sidebar-label,
+        .rs-theme-dark .rs-sidebar-item { color: ${C.grey} !important; }
+        .rs-theme-dark .rs-sidebar-item:hover { background: ${C.cream} !important; }
+        .rs-theme-dark .rs-public-hero h1,
+        .rs-theme-dark .rs-public-section-heading h2,
+        .rs-theme-dark .rs-public-help h3,
+        .rs-theme-dark .rs-auth-heading h2,
+        .rs-theme-dark .rs-wa-heading h2,
+        .rs-theme-dark .rs-ops-header h1 { color: ${C.navy} !important; }
+        .rs-theme-dark .rs-auth-input,
+        .rs-theme-dark .rs-wa-composer select,
+        .rs-theme-dark .rs-wa-composer textarea { background: ${C.surfaceMuted} !important; color: ${C.navy} !important; }
+        .rs-ops-content { padding: 26px 28px 32px; overflow-y: auto; }
+        .rs-dashboard-content > div:first-child { margin-bottom: 26px !important; }
+        .rs-dashboard-content .rs-card { background: ${C.white}; }
+
+        @media (min-width: 640px) {
+          .rs-shell { min-height: calc(100vh - 136px); max-height: none; }
+          .rs-shell.has-sidebar .rs-sidebar { width: 224px; flex-basis: 224px; }
+          .rs-shell.has-sidebar .rs-shell-main { min-height: calc(100vh - 136px); }
+          .rs-shell.has-sidebar .rs-shell-scroll > div > div:first-child { padding-left: 34px !important; padding-right: 34px !important; }
+        }
+        @media (max-width: 760px) {
+          .rs-page { padding: 10px 8px 20px; }
+          .rs-global-header { align-items: flex-start; padding: 12px; }
+          .rs-global-utility { margin-left: auto; }
+          .rs-global-status { display: none; }
+          .rs-role-switch button { padding: 7px 8px !important; font-size: 10px !important; }
+          .rs-role-switch button svg { display: none; }
+          .rs-portal-header { padding: 13px 16px; }
+          .rs-portal-header-actions .rs-service-status, .rs-portal-header-actions .rs-header-user span:last-child { display: none; }
+          .rs-service-nav { overflow-x: auto; gap: 14px; padding: 0 16px; white-space: nowrap; }
+          .rs-service-nav-label { display: none; }
+          .rs-ops-shell { display: block; }
+          .rs-ops-sidebar { display: none; }
+          .rs-ops-header { padding: 15px 16px; }
+          .rs-ops-header h1 { font-size: 18px; }
+          .rs-ops-header-actions .rs-service-status, .rs-ops-header-actions .rs-header-user span:last-child { display: none; }
+          .rs-ops-subnav, .rs-ops-content { padding-left: 16px; padding-right: 16px; }
+        }
+        @media (max-width: 480px) {
+          .rs-admin-auth-screen {
+            width: 100%;
+            min-height: calc(100vh - 104px);
+            align-items: start;
+            padding: 14px 10px 24px;
+            overflow-x: hidden;
+          }
+          .rs-admin-auth-screen > .rs-card {
+            width: 100%;
+            max-width: 440px;
+            min-width: 0;
+            padding: 18px 16px !important;
+          }
+          .rs-admin-auth-screen .rs-auth-input-row {
+            min-width: 0;
+          }
+          .rs-admin-auth-screen .rs-auth-input-row .rs-auth-input {
+            min-width: 0;
+          }
+          .rs-global-header { margin-bottom: 10px; }
+          .rs-global-brand p:first-child { font-size: 13px !important; }
+          .rs-global-brand p:last-child { font-size: 9px !important; }
+          .rs-global-brand img { width: 26px !important; height: 26px !important; }
+          .rs-role-switch button { padding: 7px 6px !important; }
+          .rs-portal-header-title strong { font-size: 13px; }
+          .rs-portal-header { min-height: 61px; }
+          .rs-ops-subnav span:not(.rs-subnav-spacer):not(.rs-subnav-divider) { font-size: 9px; }
+          .rs-public-service-grid { grid-template-columns: 1fr; }
+          .rs-public-service-grid button { min-height: 102px; flex-direction: row; align-items: center; }
+          .rs-public-service-grid button > svg:last-child { margin-left: auto; }
+          .rs-public-hero h1 { font-size: clamp(28px, 9vw, 34px); }
+          .rs-public-hero-actions { align-items: stretch; flex-direction: column; gap: 12px; }
+          .rs-public-hero-actions > button { width: 100%; }
+          .rs-public-footer { gap: 8px; font-size: 9px; }
+          .rs-auth-card { border-radius: 10px; }
+          .rs-notification-popover { width: calc(100vw - 24px); }
+          .rs-wa-compose-footer button { width: 100%; justify-content: center; min-height: 42px; }
+          .rs-wa-contact-list button { min-width: 172px; }
+          .rs-header-icon, .rs-theme-toggle { min-height: 36px; }
+        }
+      `}</style>
+      <div className={`rs-page ${theme === "dark" ? "rs-theme-dark" : ""}`} style={{ fontFamily: "Inter, 'Noto Sans Devanagari', sans-serif", minHeight: "100vh" }}>
+        {/* Role switcher — for demo/judge navigation, not part of the beneficiary product itself */}
+        <header className="rs-global-header">
+          <div className="rs-global-brand">
+            <img src={LOGO_SRC} alt="" style={{ width: 30, height: 30, objectFit: "contain" }} />
+            <div>
+              <p style={{ margin: 0, fontFamily: "Poppins, sans-serif", fontWeight: 800, fontSize: 15 }}>Ration<span style={{ color: C.green }}>Setu</span></p>
+              <p style={{ margin: "1px 0 0", color: C.grey, fontSize: 10.5, fontWeight: 600 }}>Digital Public Distribution System</p>
+            </div>
+          </div>
+          <div className="rs-global-utility">
+            <span className="rs-global-status"><span className="rs-status-dot" /> Portal services available</span>
+            <button
+              type="button"
+              className="rs-theme-toggle"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-pressed={theme === "dark"}
+              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? "☀ Light" : "☾ Dark"}
+            </button>
+            <div className="rs-role-switch">
+            {[
+              { key: "beneficiary", label: t(dict.roleBen), icon: User },
+              { key: "dealer", label: t(dict.roleDealer), icon: LayoutDashboard },
+              { key: "admin", label: t(dict.roleAdmin), icon: BarChart3 },
+            ].map((r) => (
+              <button key={r.key} onClick={() => { setRole(r.key); if (r.key !== "dealer") setDealerAuthenticated(false); if (r.key !== "admin") setAdminAuthenticated(false); }} style={{
+                display: "flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: 9,
+                border: "none", cursor: "pointer", fontWeight: 700, fontSize: 12.5,
+                background: role === r.key ? C.navy : "transparent", color: role === r.key ? C.white : C.grey,
+              }}>
+                <r.icon size={13} /> {r.label}
+              </button>
+            ))}
+            </div>
+          </div>
+        </header>
+
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {role === "beneficiary" && <BeneficiaryApp state={state} dispatch={dispatch} lang={lang} setLang={setLang} />}
+          {role === "dealer" && !dealerAuthenticated && <DealerLoginScreen onLogin={() => setDealerAuthenticated(true)} />}
+          {role === "dealer" && dealerAuthenticated && <DealerDashboard state={state} dispatch={dispatch} lang={lang} onLogout={() => setDealerAuthenticated(false)} />}
+          {role === "admin" && !adminAuthenticated && <AdminLoginScreen onLogin={() => setAdminAuthenticated(true)} />}
+          {role === "admin" && adminAuthenticated && <AdminDashboard state={state} dispatch={dispatch} onLogout={() => setAdminAuthenticated(false)} />}
+        </div>
+
+        <p style={{ textAlign: "center", fontSize: 11, color: C.grey, marginTop: 22 }}>
+          {t(dict.studentProto)} · {t(dict.disclaimerShort)}
+        </p>
+      </div>
+    </LangCtx.Provider>
+  );
+}
